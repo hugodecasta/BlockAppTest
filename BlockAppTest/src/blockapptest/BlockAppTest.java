@@ -5,6 +5,8 @@
  */
 package blockapptest;
 
+import blockapptest.GameManagement.Game;
+
 /**
  *
  * @author i3mainz
@@ -16,7 +18,7 @@ public class BlockAppTest {
      */
     public static void main(String[] args)
     {
-        //GAME start
+        Game g = new Game();
     }
     
 }
