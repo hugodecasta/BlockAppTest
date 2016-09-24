@@ -49,7 +49,10 @@ public class TypeManager implements Iterable<BlockType>, Iterator<BlockType>
 
     @Override
     public boolean hasNext() {
-        return index < types.size();
+        boolean ret = index < types.size();
+        if(!ret)
+            index = 0;
+        return ret;
     }
 
     @Override

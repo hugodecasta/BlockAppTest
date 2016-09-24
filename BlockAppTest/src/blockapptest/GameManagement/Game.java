@@ -85,11 +85,11 @@ public class Game implements Drawable
             type.draw(tx, ty, blockSize, blockSize, d);
             ty += blockSize + 20;
         }
-        /*
+        
         d.fill(230,51,42);
         d.rect(x,y,width,buttonHeight);
         d.rect(x,y+height+1-buttonHeight,width,buttonHeight);
         
-        mainStream.draw(x+libraryWidth, y+buttonHeight, width-libraryWidth, height-(buttonHeight*2), d);*/
+        mainStream.draw(x+libraryWidth, y+buttonHeight, width-libraryWidth, height-(buttonHeight*2), d);
     }
 }

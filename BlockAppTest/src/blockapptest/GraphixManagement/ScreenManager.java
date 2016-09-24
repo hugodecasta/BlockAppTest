@@ -109,7 +109,6 @@ public class ScreenManager
     {
         x = x*size;
         y = y*size;
-        System.out.println(x);
         g2d.setColor(fill);
         g2d.setFont(font);
         g2d.drawString(text, (int)x, (int)y);
