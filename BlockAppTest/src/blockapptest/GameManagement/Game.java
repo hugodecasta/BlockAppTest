@@ -7,6 +7,7 @@ package blockapptest.GameManagement;
 
 import blockapptest.GraphixManagement.AndroidFrame;
 import blockapptest.GraphixManagement.Drawable;
+import blockapptest.GraphixManagement.MainDrawer;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
@@ -21,22 +22,24 @@ public class Game implements Drawable
     
     public Game()
     {
-        frame = new AndroidFrame(this);
+        frame = new AndroidFrame(this,.5);
     }
 
     @Override
-    public void draw(int x, int y, int width, int height, Graphics2D g)
+    public void draw(double x,double y,double width,double height,MainDrawer d)
     {
-        g.setColor(Color.WHITE);
-        g.fillRect(x, y, width, height);
+        d.noStroke();
         
-        int libSize = 60;
-        g.setColor(Color.BLUE);
-        g.fillRect(x, y, libSize, height);
+        d.fill(255,255);
+        d.rect(x, y, width, height);
         
-        int buttonSize = 50;
-        g.setColor(Color.red);
-        g.fillRect(x, y, width, buttonSize);
-        g.fillRect(x, (height-buttonSize)+y, width, buttonSize);
+        double libraryWidth = (width/770)*200;
+        d.fill(255,100,255);
+        d.rect(x,y,libraryWidth,height);
+        
+        double buttonHeight = (height/770)*70;
+        d.fill(255,100,100);
+        d.rect(x,y,width,buttonHeight);
+        d.rect(x,y+height+1-buttonHeight,width,buttonHeight);
     }
 }

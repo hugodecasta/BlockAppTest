@@ -13,6 +13,10 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -23,13 +27,18 @@ import javax.swing.JPanel;
 public class AndroidFrame extends JFrame
 {
     Drawable game;
-    public AndroidFrame(Drawable game)
+    double size;
+    int width, height;
+    public AndroidFrame(Drawable game,double size)
     {
         super();
         this.game = game;
+        this.size = size;
+        this.width = (int)(size*1400);
+        this.height = (int)(size*2100);
         this.setTitle("Android frame 0.1");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setPreferredSize(new Dimension(500,500));
+        this.setPreferredSize(new Dimension(width,height));
         this.add(new Panel());
         this.pack();
         this.setVisible(true);
@@ -37,18 +46,29 @@ public class AndroidFrame extends JFrame
     class Panel extends JPanel
     {
         Image androidImage;
+        MainDrawer drawer;
         public Panel()
         {
-            //androidImage = new BufferedImage(WIDTH, WIDTH, WIDTH)
+            try
+            {
+                BufferedImage image = ImageIO.read(new File("src\\blockapptest\\GraphixManagement\\android.png"));
+                androidImage = image;
+            }
+            catch(IOException e)
+            {
+            };
         }
         @Override
         public void paint(Graphics g)
         {
             super.paint(g);
-            this.setBackground(Color.BLACK);
+            g.drawImage(androidImage, 0, 0,width,height, this);
+            
             Graphics2D g2 = (Graphics2D) g;
-            g2.drawImage(androidImage, 0,0,50,50,this);
-            game.draw(30, 30, 300, 400, g2);
+            if(drawer == null)
+                drawer = new MainDrawer(g2);
+            
+            game.draw((int)(316*size), (int)(410*size), (int)(770*size), (int)(1280*size), drawer);
         }
     }
 }
