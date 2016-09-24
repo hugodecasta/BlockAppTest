@@ -3,20 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package blockapptest;
+package blockapptest.GameManagement;
 
 /**
  *
  * @author i3mainz
  */
-public class BlockAppTest {
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args)
-    {
-        //GAME start
-    }
+public class Game {
     
 }
