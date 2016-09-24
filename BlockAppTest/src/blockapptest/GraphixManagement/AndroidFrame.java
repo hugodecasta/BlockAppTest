@@ -11,6 +11,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -66,9 +67,12 @@ public class AndroidFrame extends JFrame
             
             Graphics2D g2 = (Graphics2D) g;
             if(drawer == null)
-                drawer = new MainDrawer(g2);
+                drawer = new MainDrawer(g2,size);
             
-            game.draw((int)(316*size), (int)(410*size), (int)(770*size), (int)(1280*size), drawer);
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                          RenderingHints.VALUE_ANTIALIAS_ON);
+            
+            game.draw(316, 410, 770, 1280, drawer);
         }
     }
 }

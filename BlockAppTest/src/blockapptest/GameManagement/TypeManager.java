@@ -6,13 +6,16 @@
 package blockapptest.GameManagement;
 
 import blockapptest.BlockManagement.BlockType;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 /**
  *
  * @author i3mainz
  */
-public class TypeManager
+public class TypeManager implements Iterable<BlockType>, Iterator<BlockType>
 {
     HashMap<String, BlockType>types;
     public TypeManager()
@@ -28,5 +31,38 @@ public class TypeManager
     public void addType(BlockType type)
     {
         types.put(type.getName(), type);
+    }
+    
+    public ArrayList<BlockType>getTypes()
+    {
+        ArrayList<BlockType>allTypes = new ArrayList<>();
+        for(Entry<String, BlockType> entry : types.entrySet()) 
+            allTypes.add(entry.getValue());
+        return allTypes;
+    }
+
+    private int index = 0;
+    @Override
+    public Iterator<BlockType> iterator() {
+        return this;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return index < types.size();
+    }
+
+    @Override
+    public BlockType next() {
+        int id = 0;
+        index++;
+        for(Entry<String, BlockType> entry : types.entrySet()) 
+        {
+            System.out.println(index);
+            if(id==index-1)
+                return entry.getValue();
+            ++id;
+        }
+        return null;
     }
 }

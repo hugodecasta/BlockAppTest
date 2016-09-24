@@ -5,20 +5,32 @@
  */
 package blockapptest.BlockManagement;
 
+import blockapptest.GraphixManagement.Drawable;
+
 /**
  *
  * @author i3mainz
  */
-public abstract class BlockType
+public abstract class BlockType implements Drawable
 {
     String name;
-    public BlockType(String name)
+    int userInputNeeded;
+    
+    public BlockType(String name,int userInputNeeded,int blockInputNeeded,int streamOutputNeeded)
     {
         this.name = name;
+        this.userInputNeeded = userInputNeeded;
+    }
+    
+    public int getUserInputNeeded()
+    {
+        return userInputNeeded;
     }
     
     public String getName()
     {
         return name;
     }
+    
+    public abstract String getAsm(int[]userInputs);
 }
