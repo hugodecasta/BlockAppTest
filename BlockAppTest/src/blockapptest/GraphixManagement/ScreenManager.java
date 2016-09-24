@@ -6,13 +6,14 @@
 package blockapptest.GraphixManagement;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 
 /**
  *
  * @author i3mainz
  */
-public class MainDrawer
+public class ScreenManager
 {
     //-----------------------------------------------------------------
     Graphics2D g2d;
@@ -21,14 +22,20 @@ public class MainDrawer
     boolean filling,stroking;
     double size;
     double strokeWeight;
+    Font font;
     //-----------------------------------------------------------------
-    public MainDrawer(Graphics2D g,double size)
+    public ScreenManager(Graphics2D g,double size)
     {
         this.size = size;
         g2d = g;
+        textSize(30);
         fill(255,0,0,255);
         noStroke();
         strokeWeight(1);
+    }
+    public void setGraphics(Graphics2D g)
+    {
+        this.g2d = g;
     }
     //-----------------------------------------------------------------
     public void strokeWeight(double weight)
@@ -98,17 +105,32 @@ public class MainDrawer
         }
     }
 
-    public void text(String text, double x, double y, int textSize)
+    public void text(String text, double x, double y)
     {
         x = x*size;
         y = y*size;
         System.out.println(x);
         g2d.setColor(fill);
+        g2d.setFont(font);
         g2d.drawString(text, (int)x, (int)y);
     }
     
     public void setSize(double size)
     {
         this.size = size;
+    }
+    
+    public void textSize(double textSize)
+    {
+        this.font = new Font("Arial",Font.PLAIN, (int)(textSize*size));
+    }
+    //-----------------------------------------------------------------
+    public void touchDown(double x,double y)
+    {
+        System.out.println(x+" - "+y);
+    }
+    public void touchUp(double x,double y)
+    {
+        System.out.println(x+" - "+y);
     }
 }

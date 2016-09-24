@@ -13,6 +13,9 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -47,32 +50,55 @@ public class AndroidFrame extends JFrame
     class Panel extends JPanel
     {
         Image androidImage;
-        MainDrawer drawer;
+        ScreenManager drawer;
+        double xOffset, yOffset;
         public Panel()
         {
+            this.setPreferredSize(new Dimension(width,height));
             try
             {
                 BufferedImage image = ImageIO.read(new File("src\\blockapptest\\GraphixManagement\\android.png"));
                 androidImage = image;
+                xOffset = 316;
+                yOffset = 410;
             }
             catch(IOException e)
             {
             };
+            
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e)
+                { 
+                    double x = e.getX();
+                    double y = e.getY();
+                    drawer.touchUp(x-xOffset*size, y-yOffset*size);
+                }
+                @Override
+                public void mouseReleased(MouseEvent e)
+                { 
+                    double x = e.getX();
+                    double y = e.getY();
+                    drawer.touchUp(x-xOffset*size, y-yOffset*size);
+                }
+            });
         }
         @Override
         public void paint(Graphics g)
         {
             super.paint(g);
-            g.drawImage(androidImage, 0, 0,width,height, this);
+            //g.drawImage(androidImage, 0, 0,width,height, this);
             
             Graphics2D g2 = (Graphics2D) g;
             if(drawer == null)
-                drawer = new MainDrawer(g2,size);
+                drawer = new ScreenManager(g2,size);
+            drawer.setGraphics(g2);
             
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                           RenderingHints.VALUE_ANTIALIAS_ON);
             
-            game.draw(316, 410, 770, 1280, drawer);
+            
+            game.draw(xOffset, yOffset, 770, 1280, drawer);
         }
     }
 }

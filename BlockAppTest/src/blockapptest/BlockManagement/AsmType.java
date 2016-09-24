@@ -5,7 +5,7 @@
  */
 package blockapptest.BlockManagement;
 
-import blockapptest.GraphixManagement.MainDrawer;
+import blockapptest.GraphixManagement.ScreenManager;
 
 /**
  *
@@ -15,9 +15,9 @@ public class AsmType extends BlockType
 {
     String instruction;
     
-    public AsmType(String instruction, int inputsNeeded)
+    public AsmType(String name, String instruction, int inputsNeeded)
     {
-        super(instruction,inputsNeeded,0,0);
+        super(name,inputsNeeded,0,0);
         this.instruction = instruction;
     }
     
@@ -28,15 +28,13 @@ public class AsmType extends BlockType
     }
 
     @Override
-    public void draw(double x, double y, double width, double height, MainDrawer d)
+    public void draw(double x, double y, double width, double height, ScreenManager d)
     {
         d.fill(102,36,131);
-        d.stroke(255,255,255,255);
-        d.strokeWeight(5);
         d.rect(x, y, height, width);
-        d.noStroke();
         d.fill(255);
-        d.text(name,x+10,y+height/2,20);
+        d.textSize(50);
+        d.text(name,x+20,y+height/1.7);
     }
     
 }

@@ -58,11 +58,15 @@ public class TypeManager implements Iterable<BlockType>, Iterator<BlockType>
         index++;
         for(Entry<String, BlockType> entry : types.entrySet()) 
         {
-            System.out.println(index);
             if(id==index-1)
                 return entry.getValue();
             ++id;
         }
         return null;
+    }
+    
+    public BlockType get(String typeName)
+    {
+        return types.get(typeName);
     }
 }

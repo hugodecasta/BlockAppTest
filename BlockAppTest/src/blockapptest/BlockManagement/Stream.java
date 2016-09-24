@@ -6,7 +6,7 @@
 package blockapptest.BlockManagement;
 
 import blockapptest.GraphixManagement.Drawable;
-import blockapptest.GraphixManagement.MainDrawer;
+import blockapptest.GraphixManagement.ScreenManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -40,6 +40,16 @@ public class Stream implements Drawable
         asm += "ret\n";
         return asm;
     }
+    
+    public BlockNode addBlock(BlockType type)
+    {
+        if(firstNode != null)
+        {
+            return firstNode.addBlock(type);
+        }
+        else
+            return firstNode = new BlockNode(type);
+    }
     //------------------------------------------------------- STATIC PART
     public static String getFullAsm()
     {
@@ -51,6 +61,7 @@ public class Stream implements Drawable
         }
         return asm;
     }
+    
     public static void addToParse(Stream stream)
     {
         if(toParse == null)
@@ -76,9 +87,15 @@ public class Stream implements Drawable
     }
 
     @Override
-    public void draw(double x, double y, double width, double height, MainDrawer d)
+    public void draw(double x, double y, double width, double height, ScreenManager d)
     {
-        d.fill(0,255,0);
-        d.rect(x, y, width, height);
+        double blockSize = 200;
+        if(firstNode!=null)
+        {
+            firstNode.draw(x+(width/2-blockSize/2), y+10, blockSize, blockSize, d);
+            return;
+        }
+        d.fill(111);
+        d.rect(x+(width/2-blockSize/2+10), y+20, blockSize-20, blockSize-20);
     }
 }

@@ -13,5 +13,5 @@ import java.awt.Graphics2D;
  */
 public interface Drawable
 {
-    public void draw(double x,double y,double width,double height,MainDrawer d);
+    public void draw(double x,double y,double width,double height,ScreenManager d);
 }
