@@ -6,6 +6,8 @@
 package blockapptest.GameManagement;
 
 import blockapptest.BlockManagement.BlockType;
+import blockapptest.ScreenManagement.Screen;
+import blockapptest.ScreenManagement.ScreenComponent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,22 +17,36 @@ import java.util.Map.Entry;
  *
  * @author i3mainz
  */
-public class TypeManager implements Iterable<BlockType>, Iterator<BlockType>
+public class BlockLibrary extends ScreenComponent implements Iterable<BlockType>, Iterator<BlockType>
 {
     HashMap<String, BlockType>types;
-    public TypeManager()
-    {
-        initTypes();
-    }
-    
-    private void initTypes()
+    ArrayList<LibraryBlock>libBlocks;
+    public BlockLibrary()
     {
         types = new HashMap<>();
+        libBlocks = new ArrayList<>();
     }
     
     public void addType(BlockType type)
     {
         types.put(type.getName(), type);
+        LibraryBlock libBlock = new LibraryBlock(type);
+        libBlocks.add(libBlock);
+        Screen.addComponent(libBlock);
+        resetBounds();
+    }
+    
+    private void resetBounds()
+    {
+        double libBlockSize = width-20;
+        double separate = 10;
+        double leftOffset = x+separate;
+        double topOffset = y+separate;
+        
+        for(int i=0;i<libBlocks.size();++i)
+        {
+            libBlocks.get(i).setBounds(leftOffset, topOffset+(i*(libBlockSize+separate)), libBlockSize, libBlockSize);
+        }
     }
     
     public ArrayList<BlockType>getTypes()
@@ -71,5 +87,15 @@ public class TypeManager implements Iterable<BlockType>, Iterator<BlockType>
     public BlockType get(String typeName)
     {
         return types.get(typeName);
+    }
+
+    @Override
+    public void initDraw() {
+        Screen.fill(111);
+    }
+
+    @Override
+    public void draw() {
+        Screen.rect(x, y, width, height);
     }
 }

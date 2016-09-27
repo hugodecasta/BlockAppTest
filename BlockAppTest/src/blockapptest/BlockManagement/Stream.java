@@ -5,8 +5,10 @@
  */
 package blockapptest.BlockManagement;
 
-import blockapptest.GraphixManagement.Drawable;
-import blockapptest.GraphixManagement.ScreenManager;
+import blockapptest.ScreenManagement.Screen;
+import blockapptest.ScreenManagement.ScreenComponent;
+import blockapptest.old_GraphixManagement.Drawable;
+import blockapptest.old_GraphixManagement.ScreenManager;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -14,18 +16,19 @@ import java.util.HashMap;
  *
  * @author i3mainz
  */
-public class Stream implements Drawable
+public class Stream extends ScreenComponent
 {
     static HashMap<String,Integer>nameOccurences;
     static ArrayList<Stream>toParse;
     
     //------------------------------------------------------- STANDALONE PART
     String name;
-    BlockNode firstNode;
+    ArrayList<BlockNode> nodes;
     
     public Stream(String name)
     {
         this.name = createName(name);
+        nodes = new ArrayList<>();
     }
     
     public String getName()
@@ -36,19 +39,17 @@ public class Stream implements Drawable
     public String getAsm()
     {
         String asm = ":"+name+":\n";
-        asm += firstNode.getAsm();
+        for(BlockNode n : nodes)
+            asm += n.getAsm();
         asm += "ret\n";
         return asm;
     }
     
     public BlockNode addBlock(BlockType type)
     {
-        if(firstNode != null)
-        {
-            return firstNode.addBlock(type);
-        }
-        else
-            return firstNode = new BlockNode(type);
+        BlockNode node = new BlockNode(type);
+        nodes.add(node);
+        return node;
     }
     //------------------------------------------------------- STATIC PART
     public static String getFullAsm()
@@ -85,17 +86,14 @@ public class Stream implements Drawable
         nameOccurences.put(name, occurence);
         return name;
     }
+    //----------------------------------------
+    @Override
+    public void initDraw() {
+        Screen.fill(255);
+    }
 
     @Override
-    public void draw(double x, double y, double width, double height, ScreenManager d)
-    {
-        double blockSize = 200;
-        if(firstNode!=null)
-        {
-            firstNode.draw(x+(width/2-blockSize/2), y+10, blockSize, blockSize, d);
-            return;
-        }
-        d.fill(111);
-        d.rect(x+(width/2-blockSize/2+10), y+20, blockSize-20, blockSize-20);
+    public void draw() {
+        Screen.rect(x, y, width, height);
     }
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package blockapptest.GraphixManagement;
+package blockapptest.old_GraphixManagement;
 
 import blockapptest.GameManagement.Game;
 import java.awt.Color;

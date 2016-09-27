@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package blockapptest.GraphixManagement;
+package blockapptest.old_GraphixManagement;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -23,9 +23,11 @@ public class ScreenManager
     double size;
     double strokeWeight;
     Font font;
+    Finger finger;
     //-----------------------------------------------------------------
     public ScreenManager(Graphics2D g,double size)
     {
+        this.finger = new Finger();
         this.size = size;
         g2d = g;
         textSize(30);
@@ -124,12 +126,38 @@ public class ScreenManager
         this.font = new Font("Arial",Font.PLAIN, (int)(textSize*size));
     }
     //-----------------------------------------------------------------
+    public boolean mouseOn(double x,double y,double w,double h)
+    {
+        x = x*size;
+        y = y*size;
+        w = w*size;
+        h = h*size;
+        System.out.println();
+        return finger.x>=x && finger.x<=x+w && finger.y>=y && finger.y<=y+h && finger.on;
+    }
     public void touchDown(double x,double y)
     {
-        System.out.println(x+" - "+y);
+        finger.setPosition(x, y, true);
     }
     public void touchUp(double x,double y)
     {
-        System.out.println(x+" - "+y);
+        finger.setPosition(x, y, false);
+    }
+    //-----------------------------------------------------------------
+    class Finger
+    {
+        boolean on;
+        double x,y;
+        public Finger()
+        {
+            setPosition(0,0,false);
+            on = false;
+        }
+        public void setPosition(double x,double y,boolean set)
+        {
+            on = set;
+            this.x = x;
+            this.y = y;
+        }
     }
 }

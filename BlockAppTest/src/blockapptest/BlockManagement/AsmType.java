@@ -5,7 +5,7 @@
  */
 package blockapptest.BlockManagement;
 
-import blockapptest.GraphixManagement.ScreenManager;
+import java.awt.Color;
 
 /**
  *
@@ -15,26 +15,16 @@ public class AsmType extends BlockType
 {
     String instruction;
     
-    public AsmType(String name, String instruction, int inputsNeeded)
+    public AsmType(String name, String image, String instruction, int inputsNeeded, int blockInputsNeeded)
     {
-        super(name,inputsNeeded,0,0);
+        super(name,image,new Color(102,36,131),inputsNeeded,blockInputsNeeded,0);
         this.instruction = instruction;
     }
     
     @Override
     public String getAsm(int[] userInputs)
     {
-        return instruction+" $$$\n";
-    }
-
-    @Override
-    public void draw(double x, double y, double width, double height, ScreenManager d)
-    {
-        d.fill(102,36,131);
-        d.rect(x, y, height, width);
-        d.fill(255);
-        d.textSize(50);
-        d.text(name,x+20,y+height/1.7);
+        return instruction+"\n";
     }
     
 }
