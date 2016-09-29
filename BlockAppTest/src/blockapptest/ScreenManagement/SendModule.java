@@ -16,6 +16,8 @@ public interface SendModule
     public boolean connect(String id);
     public boolean connect(int id);
     
+    public boolean isConnected();
+    
     public boolean sendMessage(String message);
     public boolean sendByte(byte b);
     

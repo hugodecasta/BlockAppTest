@@ -121,6 +121,11 @@ public class Game implements ClickBackable
         System.out.println("Sending:");
         compiler.drawProgram(program);
         
+        /*if(!connector.isConnected())
+        {
+            System.err.println("Serial port is not connected");
+            return;
+        }*/
         boolean success = true;
         success &= connector.sendByte((byte)0x01);
         for(int i=0;i<program.length;++i)

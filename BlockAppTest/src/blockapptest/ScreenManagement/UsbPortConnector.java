@@ -37,11 +37,11 @@ public class UsbPortConnector implements SendModule
         try
         {
             serialPort.openPort();
-            /*serialPort.setParams(
+            serialPort.setParams(
                     SerialPort.BAUDRATE_9600,
                     SerialPort.DATABITS_8,
                     SerialPort.STOPBITS_1,
-                    SerialPort.PARITY_NONE);*/
+                    SerialPort.PARITY_NONE);
             return true;
         }
         catch(Exception e)
@@ -53,6 +53,12 @@ public class UsbPortConnector implements SendModule
     @Override
     public boolean connect(int id) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean isConnected()
+    {
+        return serialPort!=null;
     }
 
     @Override
@@ -75,6 +81,7 @@ public class UsbPortConnector implements SendModule
     public boolean disconnect() {
         try {
             serialPort.closePort();
+            serialPort = null;
             return true;
         } catch (SerialPortException ex) {
             return false;
