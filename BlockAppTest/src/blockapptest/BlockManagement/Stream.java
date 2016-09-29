@@ -5,6 +5,7 @@
  */
 package blockapptest.BlockManagement;
 
+import blockapptest.GameManagement.LibraryBlock;
 import blockapptest.ScreenManagement.Screen;
 import blockapptest.ScreenManagement.ScreenComponent;
 import blockapptest.old_GraphixManagement.Drawable;
@@ -47,9 +48,25 @@ public class Stream extends ScreenComponent
     
     public BlockNode addBlock(BlockType type)
     {
+        return addBlock(type,nodes.size());
+    }
+    public BlockNode addBlock(BlockType type,int pos)
+    {
         BlockNode node = new BlockNode(type);
-        nodes.add(node);
+        nodes.add(pos,node);
+        Screen.addComponent(node);
+        resetPosition();
         return node;
+    }
+    public void replaceBlock(BlockNode node, int newPlace)
+    {
+        int actualPlace = nodes.indexOf(node);
+        if(newPlace>actualPlace)
+            newPlace--;
+        BlockNode save = nodes.get(newPlace);
+        nodes.set(newPlace, node);
+        nodes.set(actualPlace, save);
+        resetPosition();
     }
     //------------------------------------------------------- STATIC PART
     public static String getFullAsm()
@@ -87,13 +104,100 @@ public class Stream extends ScreenComponent
         return name;
     }
     //----------------------------------------
+    double slide = 0;
+    double slideAx = 0;
+    int mayPos = -1;
+    
+    double squareSize = 100;
+    double separate = 30;
+    
+    private void resetPosition()
+    {
+        double offsetX = x+width/2;
+        for(int i=0;i<nodes.size();++i)
+        {
+            double offsetY = getSquarePosition(i);
+            nodes.get(i).setBounds(offsetX-squareSize/2, offsetY, squareSize, squareSize);
+        }
+    }
+    private double getSquarePosition(int i)
+    {
+        return (y+separate)+((squareSize+separate)*i)-slide;
+    }
+    
     @Override
-    public void initDraw() {
+    public void initDraw()
+    {
+        
         Screen.fill(255);
     }
 
     @Override
-    public void draw() {
+    public void draw()
+    {
+        Screen.fill(255);
         Screen.rect(x, y, width, height);
+        if(mayPos>-1)
+            drawIndiquator();
+    }
+    
+    private void drawIndiquator()
+    {
+        double indiqWidth = squareSize;
+        double indiqHeight = separate / 2;
+        double indiquSeparate = (separate-indiqHeight)/2;
+        
+        Screen.fill(111,200);
+        if(mayPos==nodes.size())
+        {
+            indiqWidth = squareSize;
+            indiqHeight = squareSize;
+            indiquSeparate = separate;
+        }
+        double offsetX = x+width/2;
+        double offsetY = getSquarePosition(mayPos)-separate+(indiquSeparate+indiqHeight/2);
+        Screen.roundRect(offsetX-indiqWidth/2, offsetY-indiqHeight/2, indiqWidth, indiqHeight,20);
+    }
+    
+    @Override
+    public void mouseMoveOverWidth(ScreenComponent c)
+    {
+        double posArea = separate + squareSize;
+        
+        if(c.getClass() == LibraryBlock.class || c.getClass() == BlockNode.class)
+        {
+            double dMayPos = ((Screen.mouseY-y)+(squareSize/2)+slide)/posArea;
+            mayPos = (int)Math.floor(dMayPos);
+            
+            mayPos = mayPos>nodes.size()?nodes.size():mayPos;
+            
+        }
+    }
+    @Override
+    public void mouseGrab()
+    {
+        slide += Screen.pmouseY-Screen.mouseY;
+        double listHeight = separate+(nodes.size()*(squareSize+separate))+separate;
+        if(slide<0)
+            slide = 0;
+        else if(slide > (listHeight-height))
+            slide = (listHeight>height)?listHeight-height:0;
+        resetPosition();
+    }
+    
+    @Override
+    public void mouseDropObject(ScreenComponent c)
+    {
+        if(c.getClass() == LibraryBlock.class)
+        {
+            this.addBlock(((LibraryBlock)c).getType(),mayPos);
+            mayPos = -1;
+        }
+        if(c.getClass() == BlockNode.class)
+        {
+            System.out.println(((BlockNode)c).type.name+" -> "+mayPos);
+            this.replaceBlock((BlockNode)c,mayPos);
+            mayPos = -1;
+        }
     }
 }

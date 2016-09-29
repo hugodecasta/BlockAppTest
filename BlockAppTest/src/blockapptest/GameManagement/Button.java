@@ -5,10 +5,15 @@
  */
 package blockapptest.GameManagement;
 
+import blockapptest.ScreenManagement.ClickBackable;
 import blockapptest.ScreenManagement.Screen;
 import blockapptest.ScreenManagement.ScreenComponent;
 import java.awt.Color;
 import java.awt.Image;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -19,12 +24,14 @@ public class Button extends ScreenComponent
     Color color;
     String name;
     Image image;
+    ClickBackable clicker;
     
-    public Button(String name,String image,Color color)
+    public Button(String name,String image,Color color,ClickBackable clicker)
     {
         this.name = name;
         this.color = color;
         this.image = Screen.loadImage("src/blockapptest/GameManagement/images/"+image);
+        this.clicker = clicker;
     }
     @Override
     public void initDraw()
@@ -44,5 +51,11 @@ public class Button extends ScreenComponent
     public void mouseHover()
     {
         Screen.fill(color.getRed(),color.getGreen(),color.getBlue(),200);
+    }
+    
+    @Override
+    public void mouseClicked()
+    {
+        clicker.backClick(this);
     }
 }

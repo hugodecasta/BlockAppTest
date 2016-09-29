@@ -5,16 +5,22 @@
  */
 package blockapptest.GameManagement;
 
+import blockapptest.ScreenManagement.ClickBackable;
 import blockapptest.BlockManagement.AsmType;
 import blockapptest.BlockManagement.BlockNode;
 import blockapptest.BlockManagement.BlockType;
+import blockapptest.BlockManagement.ProcedureType;
 import blockapptest.BlockManagement.Stream;
 import blockapptest.ScreenManagement.Screen;
+import blockapptest.ScreenManagement.ScreenComponent;
+import blockapptest.ScreenManagement.SendModule;
+import blockapptest.ScreenManagement.UsbPortConnector;
 import blockapptest.old_GraphixManagement.AndroidFrame;
 import blockapptest.old_GraphixManagement.Drawable;
 import blockapptest.old_GraphixManagement.ScreenManager;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,11 +29,14 @@ import java.util.logging.Logger;
  *
  * @author i3mainz
  */
-public class Game
+public class Game implements ClickBackable
 {
     BlockLibrary library;
     Stream mainStream;
     Button sendButton,taskButton;
+    Compiler compiler;
+    SendModule connector;
+    LevelManager levels;
     
     int width,height;
     
@@ -35,15 +44,34 @@ public class Game
     {
         library = new BlockLibrary();
         mainStream = new Stream("main");
+        compiler = new Compiler();
+        connector = new UsbPortConnector();
+        initConnection();
+        levels = new LevelManager();
         initGraphix();
         initTypes();
         
-        BlockNode n1 = mainStream.addBlock(library.get("pin"));
+        /*BlockNode n1 = mainStream.addBlock(library.get("pin"));
         n1.setUserInput(0, 6);
         n1.setUserInput(1, 255);
         
         BlockNode n2 = mainStream.addBlock(library.get("wait"));
-        n2.setUserInput(0, 1000);
+        n2.setUserInput(0, 1000);*/
+    }
+    
+    private void initConnection()
+    {
+        String[]portsNames = connector.getPorts();
+        if(portsNames.length<=0)
+        {
+            System.err.println("No port connected to the app...");
+            return;
+        }
+        if(connector.connect(portsNames[0]))
+            System.out.println("Success connect to port "+portsNames[0]);
+        else
+            System.err.println("Could not connect to port "+portsNames[0]);
+        
     }
     
     private void initGraphix()
@@ -54,18 +82,20 @@ public class Game
         double buttonHeight = 70;
         double libraryWidth = 100;
         
-        sendButton = new Button("Send", "check.png", new Color(230,51,42,255));
-        taskButton = new Button("Tasks", "", new Color(230,51,42,255));
+        sendButton = new Button("Send", "check.png", new Color(230,51,42,255),this);
+        taskButton = new Button("Tasks", "", new Color(230,51,42,255),this);
         
         mainStream.setBounds(libraryWidth, buttonHeight, width-libraryWidth, height-(2*buttonHeight));
         library.setBounds(0, buttonHeight, libraryWidth, height-(2*buttonHeight));
         sendButton.setBounds(0, height-buttonHeight, width, buttonHeight);
         taskButton.setBounds(0, 0, width-buttonHeight, buttonHeight);
+        levels.setBounds(width-buttonHeight, 0, buttonHeight, buttonHeight);
         
         Screen.addComponent(mainStream);
         Screen.addComponent(library);
         Screen.addComponent(sendButton);
         Screen.addComponent(taskButton);
+        Screen.addComponent(levels);
     }
     
     public void run()
@@ -86,13 +116,47 @@ public class Game
     
     public void build()
     {
-        String asm = "call main\njmp end\n"+mainStream.getAsm()+":end:";
-        System.out.println(asm);
+        String asm = "call main\njmp end\n"+mainStream.getAsm()+":end:\nexit";
+        byte[]program = compiler.compile(asm);
+        System.out.println("Sending:");
+        compiler.drawProgram(program);
+        
+        boolean success = true;
+        success &= connector.sendByte((byte)0x01);
+        for(int i=0;i<program.length;++i)
+        {
+            success &= connector.sendByte((byte)0x00);
+            success &= connector.sendByte(program[i]);
+        }
+        success &= connector.sendByte((byte)0x02);
+        if(success)
+            System.out.println("Code sent success");
+        else
+            System.err.println("Error while sending code");
+            
+        //System.out.println(connector.disconnect());
     }
     
     private void initTypes()
     {
-        library.addType(new AsmType("pin","led.png","pin $0 #1", 2,0));
-        library.addType(new AsmType("wait","timer.png","wat $0", 1,0));
+        /*library.addType(new AsmType("pin","led.png","pin $0 #1", 2,0));
+        library.addType(new AsmType("wait","timer.png","wat $0", 1,0));*/
+        int leftWheelPin = 6;
+        int RightWheelPin = 7;
+        int timeMsForward = 1000;
+        int timeMsTurn90 = 500;
+        library.addType(new ProcedureType("forward","up-arrow.png",
+                "pin n "+leftWheelPin+" n 255\npin n "+RightWheelPin+" n 255\nwat n "+timeMsForward+"\npin n "+leftWheelPin+" n 0\npin n "+RightWheelPin+" n 0"));
+        library.addType(new ProcedureType("turn-left",
+                "turn-left.png","pin n "+RightWheelPin+" n 255\nwat n "+timeMsTurn90+"\npin n "+RightWheelPin+" n 0"));
+        library.addType(new ProcedureType("turn-right",
+                "turn-right.png","pin n "+leftWheelPin+" n 255\nwat n "+timeMsTurn90+"\npin n "+leftWheelPin+" n 0"));
+    }
+
+    @Override
+    public void backClick(ScreenComponent c)
+    {
+        if(c==sendButton)
+            build();
     }
 }

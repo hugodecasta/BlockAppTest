@@ -13,11 +13,10 @@ public abstract class ScreenComponent
 {
     public double x,y,width,height;
     public int R,G,B,A;
-    public boolean overlay;
+    public boolean overlayOnGrab = false, mouseCatcher = true, touchable = true;
     
     public ScreenComponent()
     {
-        
     }
     
     public void setBounds(double x,double y,double width,double height)
@@ -34,19 +33,28 @@ public abstract class ScreenComponent
         this.B = B;
         this.A = A;
     }
-    public void setOverlay(boolean overlay)
-    {
-        this.overlay = overlay;
-    }
     
     public abstract void initDraw();
     public abstract void draw();
+    
+    public void initDrawOverlay()
+    {
+        
+    }
+    public void drawOverlay()
+    {
+        
+    }
     
     public void mousePressed()
     {
         
     }
     public void mouseReleased()
+    {
+        
+    }
+    public void mouseClicked()
     {
         
     }

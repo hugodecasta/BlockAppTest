@@ -38,8 +38,9 @@ public class BlockLibrary extends ScreenComponent implements Iterable<BlockType>
     
     private void resetBounds()
     {
-        double libBlockSize = width-20;
-        double separate = 10;
+        double border = 30;
+        double libBlockSize = width-border;
+        double separate = border/2;
         double leftOffset = x+separate;
         double topOffset = y+separate;
         

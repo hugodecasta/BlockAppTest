@@ -31,7 +31,7 @@ import javax.swing.JPanel;
  */
 public class Screen
 {
-    static ArrayList<ScreenComponent>components;
+    static ArrayList<ScreenComponent>components,componentToAdd;
     static int width, height;
     static double size;
     static Graphics2D g;
@@ -62,13 +62,14 @@ public class Screen
     {
         if(components==null)
             components = new ArrayList<>();
+        if(componentToAdd==null)
+            componentToAdd = new ArrayList<>();
     }
     public static void addComponent(ScreenComponent c)
     {
         initComponent();
-        components.add(c);
+        componentToAdd.add(c);
     }
-    
     public static void removeComponent()
     {
         initComponent();
@@ -84,7 +85,8 @@ public class Screen
         public Frame()
         {
             this.addMouseListener(this);
-            this.setPreferredSize(new Dimension((int)(width*size)+17,(int)(height*size)+40));
+            this.setPreferredSize(new Dimension((int)(width*size)+6,(int)(height*size)+29));
+            this.setResizable(false);
             this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             this.add(new Panel());
             this.pack();
@@ -118,57 +120,75 @@ public class Screen
             {
                 return mx>c.x && mx<c.x+c.width && my>c.y && my<c.y+c.height;
             }
-            private boolean screenTouch(ScreenComponent c)
+            private int screenTouch(ScreenComponent c,boolean act)
             {
                 boolean mousePressed = mouseState && !pmouseState;
                 boolean mouseReleased = !mouseState && pmouseState;
                 boolean mouseHold = mouseState && pmouseState;
                 boolean noHold = !mouseState && !pmouseState;
                 
-                
+                boolean cTouched = touch(mouseX,mouseY,c);
+                int mouseCatched = 0; //0=no; 1=touched but follow;2 =touched end;
                 
                 if(mousePressed)
                 {
-                    if(touch(mouseX,mouseY,c))
+                    if(cTouched)
                     {
-                        c.mousePressed();
+                        mouseCatched = 2;
+                        if(act)c.mousePressed();
                         grabbed = c;
-                        return true;
                     }
                 }
                 else if(mouseReleased)
                 {
-                    if(grabbed!=null && grabbed==c)
+                    if(c==grabbed)
                     {
-                        grabbed.mouseDrop();
+                        mouseCatched = 1;
+                        if(act)c.mouseReleased();
+                        if(act)c.mouseClicked();
+                        if(act)c.mouseDrop();
                     }
-                    if(touch(mouseX,mouseY,c))
+                    else if(cTouched)
                     {
-                        c.mouseReleased();
+                        mouseCatched = 2;
                         if(grabbed!=null)
                         {
-                            c.mouseDropObject(grabbed);
+                            if(act)c.mouseDropObject(grabbed);
                         }
-                        return true;
+                        if(act)c.mouseReleased();
                     }
                 }
                 else if(mouseHold)
                 {
-                    if(touch(mouseX,mouseY,c) && c!=grabbed && grabbed!=null)
+                    if(c==grabbed)
                     {
-                        c.mouseMoveOverWidth(grabbed);
-                        return true;
+                        mouseCatched = 1;
+                        if(act)c.mouseGrab();
+                    }
+                    else if(grabbed!=null)
+                    {
+                        if(cTouched)
+                        {
+                            mouseCatched = 2;
+                            if(act)c.mouseMoveOverWidth(grabbed);
+                        }
+                    }
+                    else if(cTouched)
+                    {
+                        mouseCatched = 2;
+                        if(act)c.mouseHover();
                     }
                 }
                 else if(noHold)
                 {
-                    if(touch(mouseX,mouseY,c))
+                    if(cTouched)
                     {
-                        c.mouseHover();
-                        return true;
+                        mouseCatched = 2;
+                        if(act)c.mouseHover();
                     }
                 }
-                return false;
+                
+                return c.mouseCatcher?mouseCatched:0;
             }
             @Override
             public void paint(Graphics g)
@@ -183,48 +203,51 @@ public class Screen
                 Screen.g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
                 Screen.g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
                 
+                components.addAll(componentToAdd);
+                componentToAdd.clear();
+                
                 background(0);
-                /*fill(255);
-                if(mouseState)
-                    if(mouseButton==1)
-                        fill(255,0,0);
-                    else if(mouseButton==2)
-                        fill(0,255,0);
-                    else if(mouseButton==3)
-                        fill(0,0,255);
-                rect(mouseX-10,mouseY-10,20,20);*/
                 
                 boolean mouseFunc = false;
-                ScreenComponent t = null;
-                for(int i=components.size()-1;i>=0;--i)
+                ArrayList<ScreenComponent>touched = new ArrayList<>();
+                for(int i=components.size()-1;i>=0 && !mouseFunc;--i)
                 {
-                    if(!mouseFunc)
+                    ScreenComponent c = components.get(i);
+                    if(c.touchable)
                     {
-                        mouseFunc = screenTouch(components.get(i));
-                        if(mouseFunc)
-                            t = components.get(i);
+                        int touchAppend = screenTouch(c,false);
+                        mouseFunc = touchAppend==2;
+                        if(touchAppend>0)
+                            touched.add(c);
                     }
                 }
                 for(ScreenComponent c : components)
                 {
-                    c.initDraw();
-                    if(t==c)
-                    {
-                        mouseFunc = screenTouch(c);
-                    }
-                    c.draw();
+                    boolean grabbedOverlay = c==grabbed && grabbed.overlayOnGrab;
+                    if(!grabbedOverlay)
+                        c.initDraw();
+                    if(touched.contains(c) && !grabbedOverlay)
+                        screenTouch(c,true);
+                    if(!grabbedOverlay)
+                        c.draw();
                 }
-                if(grabbed!=null && grabbed.overlay)
+                
+                if(grabbed!=null && grabbed.overlayOnGrab)
                 {
-                    grabbed.initDraw();
-                    screenTouch(grabbed);
-                    if(mouseState && pmouseState)
-                        grabbed.mouseGrab();
-                    grabbed.draw();
+                    grabbed.initDrawOverlay();
+                    screenTouch(grabbed,true);
+                    grabbed.drawOverlay();
                 }
+                
                 if(pmouseState = !mouseState)
                 {
                     grabbed = null;
+                }
+                
+                if(mouseState)
+                {
+                    fill(0,0,0,100);
+                    ellipse(mouseX-20,mouseY-20,40,40);
                 }
                 
                 pmouseState = mouseState;
@@ -345,6 +368,29 @@ public class Screen
         {
             g.setColor(fill);
             g.fillRoundRect((int)x, (int)y, (int)w, (int)h,(int)round,(int)round);
+        }
+    }
+    public static void ellipse(double x,double y,double w,double h)
+    {
+        x = x*size;
+        y = y*size;
+        w = w*size;
+        h = h*size;
+        double sizedSroke = strokeWeight*size;
+        double sx = x-sizedSroke;
+        double sy = y-sizedSroke;
+        double sw = w+sizedSroke*2;
+        double sh = h+sizedSroke*2;
+        
+        if(stroking)
+        {
+            g.setColor(stroke);
+            g.fillOval((int)sx, (int)sy, (int)sw, (int)sh);
+        }
+        if(filling)
+        {
+            g.setColor(fill);
+            g.fillOval((int)x, (int)y, (int)w, (int)h);
         }
     }
     public static void image(Image image,double x,double y,double w,double h)

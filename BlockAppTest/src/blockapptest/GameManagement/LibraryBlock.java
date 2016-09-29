@@ -20,7 +20,7 @@ public class LibraryBlock extends ScreenComponent
     public LibraryBlock(BlockType type)
     {
         this.type = type;
-        this.overlay = true;
+        this.overlayOnGrab = true;
     }
     public BlockType getType()
     {
@@ -33,7 +33,8 @@ public class LibraryBlock extends ScreenComponent
     {
         dragged = false;
         Screen.fill(type.getColor());
-        Screen.noStroke();
+        Screen.stroke(255,255,255,255);
+        Screen.strokeWeight(5);
     }
 
     @Override
@@ -42,38 +43,53 @@ public class LibraryBlock extends ScreenComponent
         Screen.translate(x, y);
         drawIt();
         Screen.resetTransform();
-        
-        if(dragged)
-        {
-            Screen.stroke(0,0,0,255);
-            Screen.strokeWeight(5);
-            Screen.translate(Screen.mouseX-width/2,Screen.mouseY-height/2);
-            Screen.rotate(5);
-            
-            drawIt();
-            
-            Screen.resetTransform();
-            Screen.noStroke();
-        }
     }
     
     private void drawIt()
     {
-        Screen.roundRect(0, 0, width, height,10);
+        int imageBorder = 20;
+        Screen.roundRect(0, 0, width, height,20);
         if(type.getImage()!=null)
         {
-            Screen.image(type.getImage(),10,10,width-20,height-20);
+            Screen.image(type.getImage(),imageBorder,imageBorder,width-(imageBorder*2),height-(imageBorder*2));
         }
         else
         {
             Screen.fill(255);
             Screen.text(type.getName(), 30, 30);
         }
+        Screen.noStroke();
+    }
+    
+    @Override
+    public void initDrawOverlay()
+    {
+        initDraw();
+    }
+    
+    @Override
+    public void drawOverlay()
+    {
+        Screen.stroke(0,0,0,100);
+        Screen.strokeWeight(5);
+        Screen.translate(Screen.mouseX-width/2,Screen.mouseY-height/2);
+        Screen.rotate(5);
+
+        drawIt();
+
+        Screen.resetTransform();
+        Screen.noStroke();
     }
     
     @Override
     public void mouseGrab()
     {
         dragged = true;
+    }
+    
+    @Override
+    public void mouseHover()
+    {
+        Screen.fill(type.getColor().getRed(), type.getColor().getGreen(), type.getColor().getBlue(),200);
     }
 }
