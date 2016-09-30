@@ -5,6 +5,7 @@
  */
 package blockapptest.ScreenManagement;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -15,10 +16,13 @@ import java.awt.MouseInfo;
 import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -31,7 +35,7 @@ import javax.swing.JPanel;
  */
 public class Screen
 {
-    static ArrayList<ScreenComponent>components,componentToAdd;
+    static TreeMap<String,ScreenLayer>layers,layersToAdd;
     static int width, height;
     static double size;
     static Graphics2D g;
@@ -60,15 +64,23 @@ public class Screen
     }
     private static void initComponent()
     {
-        if(components==null)
-            components = new ArrayList<>();
-        if(componentToAdd==null)
-            componentToAdd = new ArrayList<>();
+        if(layers==null)
+            layers = new TreeMap<>();
+        if(layersToAdd==null)
+            layersToAdd = new TreeMap<>();
     }
-    public static void addComponent(ScreenComponent c)
+    public static void addLayer(String name)
     {
         initComponent();
-        componentToAdd.add(c);
+        layers.put(name, new ScreenLayer(name));
+    }
+    public static void addComponent(ScreenComponent c,String layer)
+    {
+        initComponent();
+        if(layers.containsKey(layer))
+            layers.get(layer).addComponent(c);
+        else
+            System.err.println("No layer called '"+layer+"'");
     }
     public static void removeComponent()
     {
@@ -116,10 +128,6 @@ public class Screen
             {
                 super();
             }
-            private boolean touch(double mx,double my,ScreenComponent c)
-            {
-                return mx>c.x && mx<c.x+c.width && my>c.y && my<c.y+c.height;
-            }
             private int screenTouch(ScreenComponent c,boolean act)
             {
                 boolean mousePressed = mouseState && !pmouseState;
@@ -127,7 +135,7 @@ public class Screen
                 boolean mouseHold = mouseState && pmouseState;
                 boolean noHold = !mouseState && !pmouseState;
                 
-                boolean cTouched = touch(mouseX,mouseY,c);
+                boolean cTouched = c.touched(mouseX,mouseY);
                 int mouseCatched = 0; //0=no; 1=touched but follow;2 =touched end;
                 
                 if(mousePressed)
@@ -203,33 +211,50 @@ public class Screen
                 Screen.g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
                 Screen.g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
                 
-                components.addAll(componentToAdd);
-                componentToAdd.clear();
+                
+                ArrayList<ScreenLayer>temp_layers = new ArrayList<>(layers.values());
+                Collections.reverse(temp_layers);
+                
+                for(ScreenLayer l : temp_layers)
+                {
+                    l.update();
+                }
                 
                 background(0);
                 
                 boolean mouseFunc = false;
                 ArrayList<ScreenComponent>touched = new ArrayList<>();
-                for(int i=components.size()-1;i>=0 && !mouseFunc;--i)
+                for(int l=temp_layers.size()-1;l>=0;--l)
                 {
-                    ScreenComponent c = components.get(i);
-                    if(c.touchable)
+                    ScreenLayer layer = temp_layers.get(l);
+                    ArrayList<ScreenComponent>temp_comps = layer.getComponents();
+                    for(int i=temp_comps.size()-1;i>=0 && !mouseFunc;--i)
                     {
-                        int touchAppend = screenTouch(c,false);
-                        mouseFunc = touchAppend==2;
-                        if(touchAppend>0)
-                            touched.add(c);
+                        ScreenComponent c = temp_comps.get(i);
+                        if(c.touchable)
+                        {
+                            int touchAppend = screenTouch(c,false);
+                            mouseFunc = touchAppend==2;
+                            if(touchAppend>0)
+                                touched.add(c);
+                        }
                     }
                 }
-                for(ScreenComponent c : components)
+                
+                for(ScreenLayer l : temp_layers)
                 {
-                    boolean grabbedOverlay = c==grabbed && grabbed.overlayOnGrab;
-                    if(!grabbedOverlay)
-                        c.initDraw();
-                    if(touched.contains(c) && !grabbedOverlay)
-                        screenTouch(c,true);
-                    if(!grabbedOverlay)
-                        c.draw();
+                    ArrayList<ScreenComponent>temp_comps = l.getComponents();
+                    for(ScreenComponent c : temp_comps)
+                    {
+                        c.updateDrivers();
+                        boolean grabbedOverlay = c==grabbed && grabbed.overlayOnGrab;
+                        if(!grabbedOverlay)
+                            c.initDraw();
+                        if(touched.contains(c) && !grabbedOverlay)
+                            screenTouch(c,true);
+                        if(!grabbedOverlay)
+                            c.draw();
+                    }
                 }
                 
                 if(grabbed!=null && grabbed.overlayOnGrab)
@@ -303,6 +328,14 @@ public class Screen
         B = B/255;
         filling = true;
         fill = new Color((float)R, (float)G, (float)B, (float)A);
+    }
+    public static void stroke(Color c)
+    {
+        stroke(c.getRed(),c.getGreen(),c.getBlue(),c.getAlpha());
+    }
+    public static void stroke(double rgb)
+    {
+        stroke(rgb,rgb,rgb,255);
     }
     public static void stroke(double R,double G, double B, double A)
     {
@@ -395,12 +428,21 @@ public class Screen
     }
     public static void image(Image image,double x,double y,double w,double h)
     {
+        image(image,x,y,w,h,255);
+    }
+    public static void image(Image image,double x,double y,double w,double h,double alpha)
+    {
         x = x*size;
         y = y*size;
         w = w*size;
         h = h*size;
+        alpha = alpha/255;
+        
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float)alpha));
         
         g.drawImage(image,(int)x,(int)y,(int)w,(int)h,null);
+        
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
     }
 
     public static void text(String text, double x, double y)

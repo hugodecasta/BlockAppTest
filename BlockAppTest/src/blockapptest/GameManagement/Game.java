@@ -20,6 +20,10 @@ import blockapptest.old_GraphixManagement.Drawable;
 import blockapptest.old_GraphixManagement.ScreenManager;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -91,11 +95,15 @@ public class Game implements ClickBackable
         taskButton.setBounds(0, 0, width-buttonHeight, buttonHeight);
         levels.setBounds(width-buttonHeight, 0, buttonHeight, buttonHeight);
         
-        Screen.addComponent(mainStream);
-        Screen.addComponent(library);
-        Screen.addComponent(sendButton);
-        Screen.addComponent(taskButton);
-        Screen.addComponent(levels);
+        Screen.addLayer("stream");
+        Screen.addLayer("library");
+        Screen.addLayer("gui");
+        
+        Screen.addComponent(mainStream,"stream");
+        Screen.addComponent(library,"library");
+        Screen.addComponent(sendButton,"gui");
+        Screen.addComponent(taskButton,"gui");
+        Screen.addComponent(levels,"gui");
     }
     
     public void run()
@@ -116,9 +124,10 @@ public class Game implements ClickBackable
     
     public void build()
     {
-        String asm = "call main\njmp end\n"+mainStream.getAsm()+":end:\nexit";
+        String asm = ""+mainStream.getAsm()+"exit";
+        System.out.println(asm);
         byte[]program = compiler.compile(asm);
-        System.out.println("Sending:");
+        System.out.println("Sending "+program.length+"_B code:");
         compiler.drawProgram(program);
         
         /*if(!connector.isConnected())
@@ -150,12 +159,21 @@ public class Game implements ClickBackable
         int RightWheelPin = 7;
         int timeMsForward = 1000;
         int timeMsTurn90 = 500;
-        library.addType(new ProcedureType("forward","up-arrow.png",
-                "pin n "+leftWheelPin+" n 255\npin n "+RightWheelPin+" n 255\nwat n "+timeMsForward+"\npin n "+leftWheelPin+" n 0\npin n "+RightWheelPin+" n 0"));
-        library.addType(new ProcedureType("turn-left",
-                "turn-left.png","pin n "+RightWheelPin+" n 255\nwat n "+timeMsTurn90+"\npin n "+RightWheelPin+" n 0"));
-        library.addType(new ProcedureType("turn-right",
-                "turn-right.png","pin n "+leftWheelPin+" n 255\nwat n "+timeMsTurn90+"\npin n "+leftWheelPin+" n 0"));
+        try
+        {
+            library.addType(new ProcedureType("forward","up-arrow.png",new Color(58,170,53),
+                    new Scanner(new File("src/blockapptest/GameManagement/images/pre_built_forward.asm")).useDelimiter("\\Z").next()));
+            library.addType(new ProcedureType("turn-left","turn-left.png",new Color(58,170,53),
+                    new Scanner(new File("src/blockapptest/GameManagement/images/pre_built_left.asm")).useDelimiter("\\Z").next()));
+            library.addType(new ProcedureType("turn-right","turn-right.png",new Color(58,170,53),
+                    new Scanner(new File("src/blockapptest/GameManagement/images/pre_built_right.asm")).useDelimiter("\\Z").next()));
+            library.addType(new ProcedureType("music","musical-note.png",new Color(243,146,0),
+                    new Scanner(new File("src/blockapptest/GameManagement/images/pre_built_music.asm")).useDelimiter("\\Z").next()));
+        }
+        catch(Exception e)
+        {
+            
+        }
     }
 
     @Override

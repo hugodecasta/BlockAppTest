@@ -54,7 +54,7 @@ public class Stream extends ScreenComponent
     {
         BlockNode node = new BlockNode(type);
         nodes.add(pos,node);
-        Screen.addComponent(node);
+        Screen.addComponent(node,"stream");
         resetPosition();
         return node;
     }
@@ -116,9 +116,14 @@ public class Stream extends ScreenComponent
         double offsetX = x+width/2;
         for(int i=0;i<nodes.size();++i)
         {
-            double offsetY = getSquarePosition(i);
+            double offsetY = getSquarePositionNoSlide(i);
             nodes.get(i).setBounds(offsetX-squareSize/2, offsetY, squareSize, squareSize);
+            nodes.get(i).setSlideOffset(slide);
         }
+    }
+    private double getSquarePositionNoSlide(int i)
+    {
+        return (y+separate)+((squareSize+separate)*i);
     }
     private double getSquarePosition(int i)
     {
@@ -128,7 +133,6 @@ public class Stream extends ScreenComponent
     @Override
     public void initDraw()
     {
-        
         Screen.fill(255);
     }
 
@@ -182,7 +186,9 @@ public class Stream extends ScreenComponent
             slide = 0;
         else if(slide > (listHeight-height))
             slide = (listHeight>height)?listHeight-height:0;
-        resetPosition();
+        for(BlockNode n : nodes)
+            n.setSlideOffset(slide);
+        //resetPosition();
     }
     
     @Override

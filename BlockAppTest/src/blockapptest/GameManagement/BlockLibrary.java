@@ -32,7 +32,7 @@ public class BlockLibrary extends ScreenComponent implements Iterable<BlockType>
         types.put(type.getName(), type);
         LibraryBlock libBlock = new LibraryBlock(type);
         libBlocks.add(libBlock);
-        Screen.addComponent(libBlock);
+        Screen.addComponent(libBlock,"library");
         resetBounds();
     }
     

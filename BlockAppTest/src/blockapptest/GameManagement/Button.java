@@ -36,6 +36,8 @@ public class Button extends ScreenComponent
     @Override
     public void initDraw()
     {
+        Screen.fill(0);
+        Screen.rect(x,y,width,height);
         Screen.fill(color);
     }
 

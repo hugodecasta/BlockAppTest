@@ -8,7 +8,7 @@ package blockapptest.GameManagement;
 import blockapptest.BlockManagement.BlockType;
 import blockapptest.ScreenManagement.Screen;
 import blockapptest.ScreenManagement.ScreenComponent;
-import java.awt.Color;
+import blockapptest.ScreenManagement.VDriver;
 
 /**
  *
@@ -17,10 +17,15 @@ import java.awt.Color;
 public class LibraryBlock extends ScreenComponent
 {
     BlockType type;
+    VDriver sizeDriver,imageDriver;
+    
     public LibraryBlock(BlockType type)
     {
         this.type = type;
         this.overlayOnGrab = true;
+        sizeDriver = addDriver();
+        imageDriver = addDriver();
+        imageDriver.setGoal(255, 255, 0);
     }
     public BlockType getType()
     {
@@ -29,8 +34,18 @@ public class LibraryBlock extends ScreenComponent
     
     boolean dragged;
     @Override
+    public void setBounds(double x,double y,double w,double h)
+    {
+        super.setBounds(x, y, w, h);
+        drawSize = width;
+    }
+    @Override
     public void initDraw()
     {
+        if(!sizeDriver.isDone())
+        {
+            drawSize = sizeDriver.getValue();
+        }
         dragged = false;
         Screen.fill(type.getColor());
         Screen.stroke(255,255,255,255);
@@ -44,14 +59,14 @@ public class LibraryBlock extends ScreenComponent
         drawIt();
         Screen.resetTransform();
     }
-    
+    double drawSize;
     private void drawIt()
     {
         int imageBorder = 20;
-        Screen.roundRect(0, 0, width, height,20);
+        Screen.roundRect(width/2.0-drawSize/2.0, width/2.0-drawSize/2.0, drawSize, drawSize,20);
         if(type.getImage()!=null)
         {
-            Screen.image(type.getImage(),imageBorder,imageBorder,width-(imageBorder*2),height-(imageBorder*2));
+            Screen.image(type.getImage(),imageBorder,imageBorder,width-(imageBorder*2),width-(imageBorder*2),imageDriver.getValue());
         }
         else
         {
@@ -72,7 +87,7 @@ public class LibraryBlock extends ScreenComponent
     {
         Screen.stroke(0,0,0,100);
         Screen.strokeWeight(5);
-        Screen.translate(Screen.mouseX-width/2,Screen.mouseY-height/2);
+        Screen.translate(Screen.mouseX-width/2,Screen.mouseY-width/2);
         Screen.rotate(5);
 
         drawIt();
@@ -85,6 +100,13 @@ public class LibraryBlock extends ScreenComponent
     public void mouseGrab()
     {
         dragged = true;
+    }
+    
+    @Override
+    public void mouseDrop()
+    {
+        imageDriver.setGoal(0, 255, 20);
+        sizeDriver.setGoal(0, width, 20,false,true);
     }
     
     @Override

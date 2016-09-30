@@ -14,9 +14,9 @@ import java.awt.Color;
 public class ProcedureType extends BlockType
 {
     String asmProcedure;
-    public ProcedureType(String name, String image, String asmProcedure)
+    public ProcedureType(String name, String image, Color color,String asmProcedure)
     {
-        super(name, image, new Color(58,170,53), 0, 0, 0);
+        super(name, image, color, 0, 0, 0);
         this.asmProcedure = asmProcedure;
     }
 

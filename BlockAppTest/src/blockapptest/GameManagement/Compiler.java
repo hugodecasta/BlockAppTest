@@ -33,14 +33,17 @@ public class Compiler
         
         compileTable.put("exit", new byte[]{0x00});
         
-        compileTable.put("n", new byte[]{0x02});
+        compileTable.put("n", new byte[]{0x01});
+        compileTable.put("r", new byte[]{0x02});
         
+        compileTable.put("reg", new byte[]{0x11});
         compileTable.put("pin", new byte[]{0x12});
-        compileTable.put("wat", new byte[]{0x34});
+        compileTable.put("ton", new byte[]{0x14});
         
         compileTable.put("call", new byte[]{0x31});
         compileTable.put("jmp", new byte[]{0x32});
         compileTable.put("ret", new byte[]{0x33});
+        compileTable.put("wat", new byte[]{0x34});
     }
     
     public byte[]compile(String asm)
@@ -50,9 +53,12 @@ public class Compiler
         
         program = new ArrayList<>();
         
+        asm = asm.replace("\r", "");
         String[]lines = asm.split("\n");
         for(String line : lines)
-            parse(line);
+            if(line.length()>0)
+                if(!(line.toCharArray()[0] == '#'))
+                    parse(line);
         
         for(Map.Entry<String, int[]> pair : toBeAdressed.entrySet())
         {

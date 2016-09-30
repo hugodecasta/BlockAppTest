@@ -7,6 +7,7 @@ package blockapptest.BlockManagement;
 
 import blockapptest.ScreenManagement.Screen;
 import blockapptest.ScreenManagement.ScreenComponent;
+import blockapptest.ScreenManagement.VDriver;
 
 
 /**
@@ -17,12 +18,35 @@ public class BlockNode extends ScreenComponent
 {
     int[]userInputs;
     BlockType type;
+    double slideOffset;
+    VDriver yDriver,imageDriver;
             
     public BlockNode(BlockType type)
     {
         userInputs = new int[type.getUserInputNeeded()];
         this.type = type;
         this.overlayOnGrab = true;
+        yDriver = addDriver();
+        imageDriver = addDriver();
+    }
+    
+    @Override
+    public void setBounds(double x,double y,double w,double h)
+    {
+        this.x = x;
+        this.width = w;
+        this.height = h;
+        int speed = 10;
+        //this.y = y;
+        if(this.y==0)
+        {
+            this.y = y;
+            imageDriver.setGoal(0, 255, 10);
+        }
+        else
+        {
+            yDriver.setGoal(this.y, y, speed,false,true);
+        }
     }
     
     public String getAsm()
@@ -35,21 +59,38 @@ public class BlockNode extends ScreenComponent
         userInputs[id] = value;
     }
 
+    public void setSlideOffset(double offset)
+    {
+        slideOffset = offset;
+    }
+    
+    @Override
+    public boolean touched(double mx,double my)
+    {
+        return mx>x && mx<x+width && my>y-slideOffset && my<y-slideOffset+height;
+    }
     @Override
     public void initDraw()
     {
+        if(!yDriver.isDone())
+        {
+            this.y = yDriver.getValue();
+            Screen.stroke(255);
+            Screen.strokeWeight(5);
+        }
         Screen.fill(type.getColor());
     }
+    double drawSize;
 
     @Override
     public void draw()
     {
         int imageBorder = 20;
-        Screen.translate(x, y);
+        Screen.translate(x, y-slideOffset);
         Screen.roundRect(0, 0, width, height,20);
         if(type.getImage()!=null)
         {
-            Screen.image(type.getImage(),imageBorder,imageBorder,width-(imageBorder*2),height-(imageBorder*2));
+            Screen.image(type.getImage(),imageBorder,imageBorder,width-(imageBorder*2),height-(imageBorder*2),imageDriver.getValue());
         }
         else
         {
@@ -57,6 +98,7 @@ public class BlockNode extends ScreenComponent
             Screen.text(type.getName(), 30, 30);
         }
         Screen.resetTransform();
+        Screen.noStroke();
     }
     
     @Override
@@ -75,7 +117,7 @@ public class BlockNode extends ScreenComponent
         Screen.roundRect(-width/2, -width/2, width, height,20);
         if(type.getImage()!=null)
         {
-            Screen.image(type.getImage(),-width/2+10,-width/2+10,width-20,height-20);
+            Screen.image(type.getImage(),-width/2+10,-width/2+10,width-20,width-20);
         }
         else
         {
