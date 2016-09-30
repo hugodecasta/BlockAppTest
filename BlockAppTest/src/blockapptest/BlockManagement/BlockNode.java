@@ -19,7 +19,7 @@ public class BlockNode extends ScreenComponent
     int[]userInputs;
     BlockType type;
     double slideOffset;
-    VDriver yDriver,imageDriver;
+    VDriver yDriver,xDriver,imageDriver;
             
     public BlockNode(BlockType type)
     {
@@ -27,26 +27,34 @@ public class BlockNode extends ScreenComponent
         this.type = type;
         this.overlayOnGrab = true;
         yDriver = addDriver();
+        xDriver = addDriver();
         imageDriver = addDriver();
+        imageDriver.setGoal(0, 255, 20);
     }
     
     @Override
     public void setBounds(double x,double y,double w,double h)
     {
-        this.x = x;
-        this.width = w;
-        this.height = h;
-        int speed = 10;
-        //this.y = y;
-        if(this.y==0)
+        int duration = 20;
+        if(dropped)
         {
-            this.y = y;
-            imageDriver.setGoal(0, 255, 10);
+            xDriver.setGoal(Screen.mouseX, x, duration,false,true);
+            yDriver.setGoal(Screen.mouseY, y, duration,false,true);
         }
         else
         {
-            yDriver.setGoal(this.y, y, speed,false,true);
+            xDriver.setGoal(this.x, x, duration,false,true);
+            yDriver.setGoal(this.y, y, duration,false,true);
         }
+        super.setBounds(x, y, w, h);
+        dropped = false;
+    }
+    boolean dropped;
+    @Override
+    public void mouseDrop()
+    {
+        /*System.out.println(type.name);
+        dropped = true;*/
     }
     
     public String getAsm()
@@ -69,14 +77,20 @@ public class BlockNode extends ScreenComponent
     {
         return mx>x && mx<x+width && my>y-slideOffset && my<y-slideOffset+height;
     }
+    
+    double dx,dy;
     @Override
     public void initDraw()
     {
         if(!yDriver.isDone())
         {
-            this.y = yDriver.getValue();
+            dy = yDriver.getValue();
             Screen.stroke(255);
             Screen.strokeWeight(5);
+        }
+        if(!xDriver.isDone())
+        {
+            dx = xDriver.getValue();
         }
         Screen.fill(type.getColor());
     }
@@ -86,7 +100,7 @@ public class BlockNode extends ScreenComponent
     public void draw()
     {
         int imageBorder = 20;
-        Screen.translate(x, y-slideOffset);
+        Screen.translate(dx, dy-slideOffset);
         Screen.roundRect(0, 0, width, height,20);
         if(type.getImage()!=null)
         {
@@ -130,6 +144,7 @@ public class BlockNode extends ScreenComponent
     @Override
     public void mouseGrab()
     {
+        dropped = true;
         Screen.fill(type.getColor().getRed(),type.getColor().getGreen(),type.getColor().getBlue(),100);
     }
 }

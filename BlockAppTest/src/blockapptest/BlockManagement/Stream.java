@@ -54,18 +54,33 @@ public class Stream extends ScreenComponent
     {
         BlockNode node = new BlockNode(type);
         nodes.add(pos,node);
+        node.mouseGrab();
         Screen.addComponent(node,"stream");
         resetPosition();
+        //resetPosition();
         return node;
     }
     public void replaceBlock(BlockNode node, int newPlace)
     {
         int actualPlace = nodes.indexOf(node);
         if(newPlace>actualPlace)
+        {
             newPlace--;
-        BlockNode save = nodes.get(newPlace);
+            for(int i=actualPlace+1;i<=newPlace;++i)
+            {
+                nodes.set(i-1, nodes.get(i));
+            }
+        }
+        else
+        {
+            for(int i=actualPlace;i>newPlace;i--)
+            {
+                nodes.set(i, nodes.get(i-1));
+            }
+        }
         nodes.set(newPlace, node);
-        nodes.set(actualPlace, save);
+        /*
+        nodes.set(actualPlace, save);*/
         resetPosition();
     }
     //------------------------------------------------------- STATIC PART
@@ -201,7 +216,7 @@ public class Stream extends ScreenComponent
         }
         if(c.getClass() == BlockNode.class)
         {
-            System.out.println(((BlockNode)c).type.name+" -> "+mayPos);
+            ((BlockNode)c).mouseDrop();
             this.replaceBlock((BlockNode)c,mayPos);
             mayPos = -1;
         }
