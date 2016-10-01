@@ -60,6 +60,12 @@ public class Stream extends ScreenComponent
         //resetPosition();
         return node;
     }
+    public void remove(BlockNode n)
+    {
+        Screen.removeComponent(n,"stream");
+        nodes.remove(n);
+        resetPosition();
+    }
     public void replaceBlock(BlockNode node, int newPlace)
     {
         int actualPlace = nodes.indexOf(node);
@@ -154,6 +160,9 @@ public class Stream extends ScreenComponent
     @Override
     public void draw()
     {
+        if(!moveOver)
+            mayPos = -1;
+        moveOver = false;
         Screen.fill(255);
         Screen.rect(x, y, width, height);
         if(mayPos>-1)
@@ -177,7 +186,7 @@ public class Stream extends ScreenComponent
         double offsetY = getSquarePosition(mayPos)-separate+(indiquSeparate+indiqHeight/2);
         Screen.roundRect(offsetX-indiqWidth/2, offsetY-indiqHeight/2, indiqWidth, indiqHeight,20);
     }
-    
+    boolean moveOver;
     @Override
     public void mouseMoveOverWidth(ScreenComponent c)
     {
@@ -189,8 +198,8 @@ public class Stream extends ScreenComponent
             mayPos = (int)Math.floor(dMayPos);
             
             mayPos = mayPos>nodes.size()?nodes.size():mayPos;
-            
         }
+        moveOver = true;
     }
     @Override
     public void mouseGrab()

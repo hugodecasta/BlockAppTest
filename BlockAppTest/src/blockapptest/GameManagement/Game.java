@@ -20,6 +20,7 @@ import blockapptest.old_GraphixManagement.Drawable;
 import blockapptest.old_GraphixManagement.ScreenManager;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,6 +42,7 @@ public class Game implements ClickBackable
     Compiler compiler;
     SendModule connector;
     LevelManager levels;
+    Trash trash;
     
     int width,height;
     
@@ -50,6 +52,7 @@ public class Game implements ClickBackable
         mainStream = new Stream("main");
         compiler = new Compiler();
         connector = new UsbPortConnector();
+        trash = new Trash(this);
         initConnection();
         levels = new LevelManager();
         initGraphix();
@@ -84,6 +87,7 @@ public class Game implements ClickBackable
         height = 740;
         
         double buttonHeight = 70;
+        double trashHeight = 100;
         double libraryWidth = 100;
         
         sendButton = new Button("Send", "check.png", new Color(230,51,42,255),this);
@@ -94,12 +98,14 @@ public class Game implements ClickBackable
         sendButton.setBounds(0, height-buttonHeight, width, buttonHeight);
         taskButton.setBounds(0, 0, width-buttonHeight, buttonHeight);
         levels.setBounds(width-buttonHeight, 0, buttonHeight, buttonHeight);
+        trash.setBounds(libraryWidth, height-(buttonHeight+trashHeight), trashHeight, trashHeight);
         
         Screen.addLayer("stream");
         Screen.addLayer("library");
         Screen.addLayer("gui");
         
         Screen.addComponent(mainStream,"stream");
+        Screen.addComponent(trash,"stream");
         Screen.addComponent(library,"library");
         Screen.addComponent(sendButton,"gui");
         Screen.addComponent(taskButton,"gui");
@@ -162,13 +168,13 @@ public class Game implements ClickBackable
         try
         {
             library.addType(new ProcedureType("forward","up-arrow.png",new Color(58,170,53),
-                    new Scanner(new File("src/blockapptest/GameManagement/images/pre_built_forward.asm")).useDelimiter("\\Z").next()));
+                    new Scanner(new File("images/pre_built_forward.asm")).useDelimiter("\\Z").next()));
             library.addType(new ProcedureType("turn-left","turn-left.png",new Color(58,170,53),
-                    new Scanner(new File("src/blockapptest/GameManagement/images/pre_built_left.asm")).useDelimiter("\\Z").next()));
+                    new Scanner(new File("images/pre_built_left.asm")).useDelimiter("\\Z").next()));
             library.addType(new ProcedureType("turn-right","turn-right.png",new Color(58,170,53),
-                    new Scanner(new File("src/blockapptest/GameManagement/images/pre_built_right.asm")).useDelimiter("\\Z").next()));
+                    new Scanner(new File("images/pre_built_right.asm")).useDelimiter("\\Z").next()));
             library.addType(new ProcedureType("music","musical-note.png",new Color(243,146,0),
-                    new Scanner(new File("src/blockapptest/GameManagement/images/pre_built_music.asm")).useDelimiter("\\Z").next()));
+                    new Scanner(new File("images/pre_built_music.asm")).useDelimiter("\\Z").next()));
         }
         catch(Exception e)
         {

@@ -101,4 +101,8 @@ public abstract class ScreenComponent
     {
         
     }
+    public void mouseMoveOn(ScreenComponent c)
+    {
+        
+    }
 }

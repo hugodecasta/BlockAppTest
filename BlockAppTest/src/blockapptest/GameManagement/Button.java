@@ -30,7 +30,7 @@ public class Button extends ScreenComponent
     {
         this.name = name;
         this.color = color;
-        this.image = Screen.loadImage("src/blockapptest/GameManagement/images/"+image);
+        this.image = Screen.loadImage("images/"+image);
         this.clicker = clicker;
     }
     @Override

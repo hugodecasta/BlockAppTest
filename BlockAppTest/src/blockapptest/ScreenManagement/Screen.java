@@ -82,9 +82,15 @@ public class Screen
         else
             System.err.println("No layer called '"+layer+"'");
     }
-    public static void removeComponent()
+    public static void removeComponent(ScreenComponent c,String layer)
     {
         initComponent();
+        if(layers.containsKey(layer))
+        {
+            layers.get(layer).removeComponent(c);
+        }
+        else
+            System.err.println("No layer called '"+layer+"'");
     }
     public static void setMouseState(boolean clicked)
     {
@@ -179,6 +185,7 @@ public class Screen
                         {
                             mouseCatched = 2;
                             if(act)c.mouseMoveOverWidth(grabbed);
+                            if(act)grabbed.mouseMoveOn(c);
                         }
                     }
                     else if(cTouched)
@@ -210,7 +217,6 @@ public class Screen
                 Screen.g = (Graphics2D)g;
                 Screen.g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
                 Screen.g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                
                 
                 ArrayList<ScreenLayer>temp_layers = new ArrayList<>(layers.values());
                 Collections.reverse(temp_layers);

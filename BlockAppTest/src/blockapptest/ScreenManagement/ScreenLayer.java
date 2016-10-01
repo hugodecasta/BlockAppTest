@@ -13,13 +13,14 @@ import java.util.ArrayList;
  */
 public class ScreenLayer
 {
-    ArrayList<ScreenComponent>components,componentsToAdd;
+    ArrayList<ScreenComponent>components,componentsToAdd,componentToRemove;
     String name;
     
     public ScreenLayer(String name)
     {
         components = new ArrayList<>();
         componentsToAdd = new ArrayList<>();
+        componentToRemove = new ArrayList<>();
         this.name = name;
     }
     
@@ -28,9 +29,16 @@ public class ScreenLayer
         componentsToAdd.add(c);
     }
     
+    public void removeComponent(ScreenComponent c)
+    {
+        componentToRemove.add(c);
+    }
+    
     public void update()
     {
         components.addAll(componentsToAdd);
+        components.removeAll(componentToRemove);
+        componentToRemove.clear();
         componentsToAdd.clear();
     }
     

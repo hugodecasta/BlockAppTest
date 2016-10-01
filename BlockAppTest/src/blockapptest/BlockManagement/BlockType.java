@@ -30,7 +30,7 @@ public abstract class BlockType
         this.name = name;
         this.color = color;
         this.userInputNeeded = userInputNeeded;
-        this.image = Screen.loadImage("src/blockapptest/GameManagement/images/"+image);
+        this.image = Screen.loadImage("images/"+image);
     }
     
     public int getUserInputNeeded()

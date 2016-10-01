@@ -5,9 +5,11 @@
  */
 package blockapptest.BlockManagement;
 
+import blockapptest.GameManagement.Trash;
 import blockapptest.ScreenManagement.Screen;
 import blockapptest.ScreenManagement.ScreenComponent;
 import blockapptest.ScreenManagement.VDriver;
+import java.awt.Color;
 
 
 /**
@@ -120,12 +122,15 @@ public class BlockNode extends ScreenComponent
     {
         initDraw();
     }
-
     @Override
     public void drawOverlay()
     {
-        draw();
+        if(!deleting)
+            draw();
         Screen.fill(type.getColor());
+        if(deleting)
+            Screen.fill(255,100,100,200);
+        deleting = false;
         Screen.translate(Screen.mouseX, Screen.mouseY);
         Screen.rotate(10);
         Screen.roundRect(-width/2, -width/2, width, height,20);
@@ -146,5 +151,12 @@ public class BlockNode extends ScreenComponent
     {
         dropped = true;
         Screen.fill(type.getColor().getRed(),type.getColor().getGreen(),type.getColor().getBlue(),100);
+    }
+    boolean deleting = false;
+    @Override
+    public void mouseMoveOn(ScreenComponent c)
+    {
+        if(c.getClass() == Trash.class)
+            deleting = true;
     }
 }
