@@ -7,60 +7,60 @@
 #define  b     2028    // 493 Hz 
 #define  C     1912    // 523 Hz 
 # song : d d d  g g  e e  d2 a g
-reg 0 n 3
+reg 0 n_3
 
 # 1 note
-reg 1 n 100
+reg 1 n_100
 # 2 note
-reg 2 n 200
+reg 2 n_200
 
-ton r 0 n 261
-wat r 1
-ton r 0 n 0
-wat n 5
+ton r_0 n_261
+wat r_1
+ton r_0 n_0
+wat n_5
 
-ton r 0 n 261
-wat r 2
-ton r 0 n 0
-wat n 5
+ton r_0 n_261
+wat r_2
+ton r_0 n_0
+wat n_5
 
-ton r 0 n 261
-wat r 1
-ton r 0 n 0
-wat n 5
+ton r_0 n_261
+wat r_1
+ton r_0 n_0
+wat n_5
 
-ton r 0 n 349
-wat r 2
-ton r 0 n 0
-wat n 5
+ton r_0 n_349
+wat r_2
+ton r_0 n_0
+wat n_5
 
-ton r 0 n 349
-wat r 2
-ton r 0 n 0
-wat n 5
+ton r_0 n_349
+wat r_2
+ton r_0 n_0
+wat n_5
 
-ton r 0 n 392
-wat r 2
-ton r 0 n 0
-wat n 5
+ton r_0 n_392
+wat r_2
+ton r_0 n_0
+wat n_5
 
-ton r 0 n 392
-wat r 2
-ton r 0 n 0
-wat n 5
+ton r_0 n_392
+wat r_2
+ton r_0 n_0
+wat n_5
 
-ton r 0 n 523
-wat r 2
-wat r 1
-ton r 0 n 0
-wat n 5
+ton r_0 n_523
+wat r_2
+wat r_1
+ton r_0 n_0
+wat n_5
 
-ton r 0 n 440
-wat r 1
-ton r 0 n 0
-wat n 5
+ton r_0 n_440
+wat r_1
+ton r_0 n_0
+wat n_5
 
-ton r 0 n 349
-wat r 1
-ton r 0 n 0
-wat n 5
+ton r_0 n_349
+wat r_1
+ton r_0 n_0
+wat n_5

@@ -5,6 +5,7 @@
  */
 package blockapptest.ScreenManagement;
 
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 /**
@@ -15,7 +16,7 @@ public abstract class ScreenComponent
 {
     public double x,y,width,height;
     public int R,G,B,A;
-    public boolean overlayOnGrab = false, mouseCatcher = true, touchable = true;
+    public boolean overlayOnGrab = false, mouseCatcher = true, touchable = true, recieveGlobalPressed = false;
     public ArrayList<VDriver>drivers;
     
     public ScreenComponent()
@@ -81,6 +82,10 @@ public abstract class ScreenComponent
     {
         
     }
+    public void mouseDoubleClicked()
+    {
+        
+    }
     public void mouseHover()
     {
         
@@ -102,6 +107,18 @@ public abstract class ScreenComponent
         
     }
     public void mouseMoveOn(ScreenComponent c)
+    {
+        
+    }
+    public void mouseGlobalPressed()
+    {
+        
+    }
+    public void keyPressed(KeyEvent key)
+    {
+        
+    }
+    public void keyReleased(KeyEvent key)
     {
         
     }

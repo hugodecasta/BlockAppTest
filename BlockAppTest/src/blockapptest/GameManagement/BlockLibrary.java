@@ -5,6 +5,7 @@
  */
 package blockapptest.GameManagement;
 
+import blockapptest.BlockManagement.AsmType;
 import blockapptest.BlockManagement.BlockType;
 import blockapptest.ScreenManagement.Screen;
 import blockapptest.ScreenManagement.ScreenComponent;
@@ -21,10 +22,12 @@ public class BlockLibrary extends ScreenComponent implements Iterable<BlockType>
 {
     HashMap<String, BlockType>types;
     ArrayList<LibraryBlock>libBlocks;
+    int asmTypes;
     public BlockLibrary()
     {
         types = new HashMap<>();
         libBlocks = new ArrayList<>();
+        asmTypes = 0;
     }
     
     public void addType(BlockType type)
@@ -32,7 +35,12 @@ public class BlockLibrary extends ScreenComponent implements Iterable<BlockType>
         types.put(type.getName(), type);
         LibraryBlock libBlock = new LibraryBlock(type);
         libBlocks.add(libBlock);
-        Screen.addComponent(libBlock,"library");
+        if(type.getClass() != AsmType.class)
+        {
+            Screen.addComponent(libBlock,"library");
+        }
+        else
+            asmTypes++;
         resetBounds();
     }
     
@@ -46,7 +54,7 @@ public class BlockLibrary extends ScreenComponent implements Iterable<BlockType>
         
         for(int i=0;i<libBlocks.size();++i)
         {
-            libBlocks.get(i).setBounds(leftOffset, topOffset+(i*(libBlockSize+separate)), libBlockSize, libBlockSize);
+            libBlocks.get(i).setBounds(leftOffset, topOffset+((i-asmTypes)*(libBlockSize+separate)), libBlockSize, libBlockSize);
         }
     }
     

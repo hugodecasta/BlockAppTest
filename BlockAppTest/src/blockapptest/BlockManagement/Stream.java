@@ -55,16 +55,38 @@ public class Stream extends ScreenComponent
         BlockNode node = new BlockNode(type);
         nodes.add(pos,node);
         node.mouseGrab();
-        Screen.addComponent(node,"stream");
+        if(drawing)
+            Screen.addComponent(node,"stream");
         resetPosition();
         //resetPosition();
         return node;
     }
     public void remove(BlockNode n)
     {
-        Screen.removeComponent(n,"stream");
+        if(drawing)
+            Screen.removeComponent(n,"stream");
         nodes.remove(n);
         resetPosition();
+    }
+    boolean drawing;
+    String layerName;
+    public void drawStream(String layer)
+    {
+        drawing = true;
+        this.layerName = layer;
+        Screen.addComponent(this, layerName);
+        for(BlockNode n : nodes)
+        {
+            Screen.addComponent(n, layerName);
+        }
+        resetPosition();
+    }
+    public void unDrawStream()
+    {
+        drawing = false;
+        for(BlockNode n : nodes)
+            Screen.removeComponent(n, layerName);
+        Screen.removeComponent(this, layerName);
     }
     public void replaceBlock(BlockNode node, int newPlace)
     {
@@ -131,8 +153,9 @@ public class Stream extends ScreenComponent
     
     double squareSize = 100;
     double separate = 30;
+    double separateYoffset = 30;
     
-    private void resetPosition()
+    protected void resetPosition()
     {
         double offsetX = x+width/2;
         for(int i=0;i<nodes.size();++i)
@@ -144,17 +167,18 @@ public class Stream extends ScreenComponent
     }
     private double getSquarePositionNoSlide(int i)
     {
-        return (y+separate)+((squareSize+separate)*i);
+        return (y+separateYoffset)+((squareSize+separate)*i);
     }
     private double getSquarePosition(int i)
     {
-        return (y+separate)+((squareSize+separate)*i)-slide;
+        return (y+separateYoffset)+((squareSize+separate)*i)-slide;
     }
     
     @Override
     public void initDraw()
     {
         Screen.fill(255);
+        Screen.rect(x, y, width, height);
     }
 
     @Override
@@ -163,8 +187,6 @@ public class Stream extends ScreenComponent
         if(!moveOver)
             mayPos = -1;
         moveOver = false;
-        Screen.fill(255);
-        Screen.rect(x, y, width, height);
         if(mayPos>-1)
             drawIndiquator();
     }
@@ -176,7 +198,7 @@ public class Stream extends ScreenComponent
         double indiquSeparate = (separate-indiqHeight)/2;
         
         Screen.fill(111,200);
-        if(mayPos==nodes.size())
+        if(mayPos==nodes.size() || samePlace)
         {
             indiqWidth = squareSize;
             indiqHeight = squareSize;
@@ -187,6 +209,7 @@ public class Stream extends ScreenComponent
         Screen.roundRect(offsetX-indiqWidth/2, offsetY-indiqHeight/2, indiqWidth, indiqHeight,20);
     }
     boolean moveOver;
+    boolean samePlace;
     @Override
     public void mouseMoveOverWidth(ScreenComponent c)
     {
@@ -198,6 +221,11 @@ public class Stream extends ScreenComponent
             mayPos = (int)Math.floor(dMayPos);
             
             mayPos = mayPos>nodes.size()?nodes.size():mayPos;
+            if(c.getClass() == BlockNode.class)
+            {
+                mayPos = mayPos==nodes.indexOf(((BlockNode)c))+1?mayPos-1:mayPos;
+                samePlace = mayPos==nodes.indexOf(((BlockNode)c));
+            }
         }
         moveOver = true;
     }
@@ -205,7 +233,7 @@ public class Stream extends ScreenComponent
     public void mouseGrab()
     {
         slide += Screen.pmouseY-Screen.mouseY;
-        double listHeight = separate+(nodes.size()*(squareSize+separate))+separate;
+        double listHeight = getRelativeStreamHeight();
         if(slide<0)
             slide = 0;
         else if(slide > (listHeight-height))
@@ -213,6 +241,11 @@ public class Stream extends ScreenComponent
         for(BlockNode n : nodes)
             n.setSlideOffset(slide);
         //resetPosition();
+    }
+    
+    public double getRelativeStreamHeight()
+    {
+        return separateYoffset+(nodes.size()*(squareSize+separate))+separate;
     }
     
     @Override

@@ -53,5 +53,5 @@ public abstract class BlockType
         return color;
     }
     
-    public abstract String getAsm(int[]userInputs);
+    public abstract String getAsm(String[]userInputs);
 }

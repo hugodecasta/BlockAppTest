@@ -14,9 +14,10 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.RenderingHints;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -94,15 +95,15 @@ public class Screen
     }
     public static void setMouseState(boolean clicked)
     {
-        pmouseState = mouseState;
         mouseState = clicked;
     }
     //-------------------------------------------
-    static class Frame extends JFrame implements MouseListener
+    static class Frame extends JFrame implements MouseListener,KeyListener
     {
         public Frame()
         {
             this.addMouseListener(this);
+            this.addKeyListener(this);
             this.setPreferredSize(new Dimension((int)(width*size)+6,(int)(height*size)+29));
             this.setResizable(false);
             this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -127,6 +128,28 @@ public class Screen
         public void mouseEntered(MouseEvent e) {}
         @Override
         public void mouseExited(MouseEvent e) {}
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            ArrayList<ScreenLayer>temp_layers = new ArrayList<>(layers.values());
+            Collections.reverse(temp_layers);
+            for(ScreenLayer l : temp_layers)
+            {
+                ArrayList<ScreenComponent>temp_comps = l.getComponents();
+                for(ScreenComponent c : temp_comps)
+                {
+                    c.keyPressed(e);
+                }
+            }
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+        }
         
         class Panel extends JPanel
         {
@@ -149,17 +172,22 @@ public class Screen
                     if(cTouched)
                     {
                         mouseCatched = 2;
+                        pressed = c;
                         if(act)c.mousePressed();
-                        grabbed = c;
                     }
                 }
                 else if(mouseReleased)
                 {
-                    if(c==grabbed)
+                    if(c==pressed)
                     {
                         mouseCatched = 1;
                         if(act)c.mouseReleased();
                         if(act)c.mouseClicked();
+                        if(lastDoubleClickCount<10)
+                            if(act)c.mouseDoubleClicked();
+                    }
+                    if(c==grabbed)
+                    {
                         if(act)c.mouseDrop();
                     }
                     else if(cTouched)
@@ -174,6 +202,12 @@ public class Screen
                 }
                 else if(mouseHold)
                 {
+                    if(c==pressed)
+                    {
+                        mouseCatched = 1;
+                        if(Math.abs(mouseX-pmouseX)>5 || Math.abs(mouseY-pmouseY)>5 && grabbed==null)
+                            grabbed = c;
+                    }
                     if(c==grabbed)
                     {
                         mouseCatched = 1;
@@ -257,7 +291,11 @@ public class Screen
                         if(!grabbedOverlay)
                             c.initDraw();
                         if(touched.contains(c) && !grabbedOverlay)
+                        {
                             screenTouch(c,true);
+                        }
+                        else if(!grabbedOverlay && c.recieveGlobalPressed && (mouseState && !pmouseState))
+                            c.mouseGlobalPressed();
                         if(!grabbedOverlay)
                             c.draw();
                     }
@@ -266,19 +304,28 @@ public class Screen
                 if(grabbed!=null && grabbed.overlayOnGrab)
                 {
                     grabbed.initDrawOverlay();
+                    if(mouseState && !pmouseState && grabbed.recieveGlobalPressed)
+                        grabbed.mouseGlobalPressed();
                     screenTouch(grabbed,true);
                     grabbed.drawOverlay();
                 }
                 
-                if(pmouseState = !mouseState)
+                if(pmouseState && !mouseState)
                 {
                     grabbed = null;
+                    pressed = null;
+                    recordClickLess = 0;
+                }
+                if(!mouseState && !pmouseState)
+                {
+                    recordClickLess++;
                 }
                 
                 if(mouseState)
                 {
                     fill(0,0,0,100);
                     ellipse(mouseX-20,mouseY-20,40,40);
+                    lastDoubleClickCount = recordClickLess;
                 }
                 
                 pmouseState = mouseState;
@@ -286,9 +333,10 @@ public class Screen
         }
     }
     //-------------------------------------------
-    static ScreenComponent grabbed;
+    static ScreenComponent pressed,grabbed;
     public static double mouseX, mouseY, pmouseX, pmouseY;
     static boolean mouseState, pmouseState;
+    static int recordClickLess,lastDoubleClickCount;
     static int mouseButton;
     static Color fill;
     static Color stroke;
@@ -510,6 +558,15 @@ public class Screen
             }
         }
         return null;
+    }
+    
+    public static void showKeyboard()
+    {
+        
+    }
+    public static void hideKeyboard()
+    {
+        
     }
     static HashMap<String,Image>imageCache;
     static double tx,ty;

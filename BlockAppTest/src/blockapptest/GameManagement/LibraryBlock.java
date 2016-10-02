@@ -6,6 +6,7 @@
 package blockapptest.GameManagement;
 
 import blockapptest.BlockManagement.BlockType;
+import blockapptest.BlockManagement.ProcedureType;
 import blockapptest.ScreenManagement.Screen;
 import blockapptest.ScreenManagement.ScreenComponent;
 import blockapptest.ScreenManagement.VDriver;
@@ -107,6 +108,13 @@ public class LibraryBlock extends ScreenComponent
     {
         imageDriver.setGoal(0, 255, 20);
         sizeDriver.setGoal(0, width, 20,false,true);
+    }
+    
+    @Override
+    public void mouseDoubleClicked()
+    {
+        if(type.getClass() == ProcedureType.class)
+            Game.setDrawStream(((ProcedureType)type).stream);
     }
     
     @Override

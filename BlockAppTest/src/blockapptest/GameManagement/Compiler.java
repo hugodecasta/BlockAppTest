@@ -17,7 +17,7 @@ public class Compiler
 {
     HashMap<String,byte[]>compileTable;
     HashMap<String,int[]>procedureAdresses;
-    HashMap<String,int[]>toBeAdressed;
+    HashMap<int[],String>toBeAdressed;
     ArrayList<Byte>program;
     
     public Compiler()
@@ -60,10 +60,10 @@ public class Compiler
                 if(!(line.toCharArray()[0] == '#'))
                     parse(line);
         
-        for(Map.Entry<String, int[]> pair : toBeAdressed.entrySet())
+        for(Map.Entry<int[],String> pair : toBeAdressed.entrySet())
         {
-            String name = pair.getKey();
-            int cursor = pair.getValue()[0];
+            String name = pair.getValue();
+            int cursor = pair.getKey()[0];
             if(procedureAdresses.containsKey(name))
             {
                 int adress = procedureAdresses.get(name)[0];
@@ -122,12 +122,14 @@ public class Compiler
                 }
                 else if(procedureAdresses.containsKey(c))
                 {
+                    program.add((byte)0x01);
                     program.addAll(createNumber(procedureAdresses.get(c)[0]));
                 }
                 else if(last.equals("call") || last.equals("jmp"))
                 {
                     //System.out.println("add wait for '"+c+"' adress : "+getCursor());
-                    toBeAdressed.put(c, new int[]{getCursor()});
+                    program.add((byte)0x01);
+                    toBeAdressed.put(new int[]{getCursor()},c);
                     program.addAll(createNumber(0));
                 }
                 else

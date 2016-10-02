@@ -10,10 +10,6 @@ import blockapptest.ScreenManagement.Screen;
 import blockapptest.ScreenManagement.ScreenComponent;
 import java.awt.Color;
 import java.awt.Image;
-import java.util.concurrent.Callable;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *

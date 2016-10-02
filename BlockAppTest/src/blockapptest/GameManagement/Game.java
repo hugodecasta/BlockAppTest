@@ -22,6 +22,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Scanner;
@@ -37,14 +38,18 @@ import java.util.logging.Logger;
 public class Game implements ClickBackable
 {
     BlockLibrary library;
-    Stream mainStream;
-    Button sendButton,taskButton;
+    static Stream mainStream;
+    static Stream actStream;
+    static Button sendButton,taskButton;
     Compiler compiler;
     SendModule connector;
     LevelManager levels;
     Trash trash;
     
-    int width,height;
+    static int width,height;
+    static double buttonHeight;
+    static double trashHeight;
+    static double libraryWidth;
     
     public Game()
     {
@@ -86,9 +91,9 @@ public class Game implements ClickBackable
         width = 480;
         height = 740;
         
-        double buttonHeight = 70;
-        double trashHeight = 100;
-        double libraryWidth = 100;
+        buttonHeight = 70;
+        trashHeight = 100;
+        libraryWidth = 100;
         
         sendButton = new Button("Send", "check.png", new Color(230,51,42,255),this);
         taskButton = new Button("Tasks", "", new Color(230,51,42,255),this);
@@ -104,12 +109,32 @@ public class Game implements ClickBackable
         Screen.addLayer("library");
         Screen.addLayer("gui");
         
-        Screen.addComponent(mainStream,"stream");
-        Screen.addComponent(trash,"stream");
+        Screen.addComponent(trash,"library");
         Screen.addComponent(library,"library");
         Screen.addComponent(sendButton,"gui");
         Screen.addComponent(taskButton,"gui");
         Screen.addComponent(levels,"gui");
+        setDrawStream(mainStream);
+    }
+    
+    public static void setDrawStream(Stream stream)
+    {
+        if(actStream==stream)
+            return;
+        if(actStream!=null)
+            actStream.unDrawStream();
+        actStream = stream;
+        actStream.setBounds(libraryWidth, buttonHeight, width-libraryWidth, height-(2*buttonHeight));
+        actStream.drawStream("stream");
+        updateSendButton();
+    }
+    
+    public static void updateSendButton()
+    {
+        if(actStream!=mainStream)
+            sendButton.image = Screen.loadImage("images/back.png");
+        else
+            sendButton.image = Screen.loadImage("images/check.png");
     }
     
     public void run()
@@ -130,7 +155,8 @@ public class Game implements ClickBackable
     
     public void build()
     {
-        String asm = ""+mainStream.getAsm()+"exit";
+        Stream.addToParse(mainStream);
+        String asm = "call main\njmp end\n\n"+Stream.getFullAsm()+":end:\nexit";
         System.out.println(asm);
         byte[]program = compiler.compile(asm);
         System.out.println("Sending "+program.length+"_B code:");
@@ -159,26 +185,48 @@ public class Game implements ClickBackable
     
     private void initTypes()
     {
-        /*library.addType(new AsmType("pin","led.png","pin $0 #1", 2,0));
-        library.addType(new AsmType("wait","timer.png","wat $0", 1,0));*/
-        int leftWheelPin = 6;
-        int RightWheelPin = 7;
-        int timeMsForward = 1000;
-        int timeMsTurn90 = 500;
-        try
-        {
-            library.addType(new ProcedureType("forward","up-arrow.png",new Color(58,170,53),
-                    new Scanner(new File("images/pre_built_forward.asm")).useDelimiter("\\Z").next()));
-            library.addType(new ProcedureType("turn-left","turn-left.png",new Color(58,170,53),
-                    new Scanner(new File("images/pre_built_left.asm")).useDelimiter("\\Z").next()));
-            library.addType(new ProcedureType("turn-right","turn-right.png",new Color(58,170,53),
-                    new Scanner(new File("images/pre_built_right.asm")).useDelimiter("\\Z").next()));
-            library.addType(new ProcedureType("music","musical-note.png",new Color(243,146,0),
-                    new Scanner(new File("images/pre_built_music.asm")).useDelimiter("\\Z").next()));
+        library.addType(new AsmType("pin", "pin.png", "pin $0 $1",2));
+        library.addType(new AsmType("wat", "timer.png", "wat $0",1));
+        library.addType(new AsmType("reg", "register.png", "reg $0 $1",2));
+        library.addType(new AsmType("ton", "buzzer.png", "ton $0 $1",2));
+        ProcedureType forward = new ProcedureType("forward","up-arrow.png",new Color(58,170,53));
+        ProcedureType turn_right = new ProcedureType("turn-right","turn-right.png",new Color(58,170,53));
+        ProcedureType turn_left = new ProcedureType("turn-left","turn-left.png",new Color(58,170,53));
+        ProcedureType music = new ProcedureType("music","musical-note.png",new Color(243,146,0));
+        library.addType(forward);
+        library.addType(turn_right);
+        library.addType(turn_left);
+        library.addType(music);
+        
+        generateProcedure(forward,"pre_built_forward.asm");
+        generateProcedure(turn_right,"pre_built_right.asm");
+        generateProcedure(turn_left,"pre_built_left.asm");
+        generateProcedure(music,"pre_built_music.asm");
+        
+    }
+    
+    private void generateProcedure(ProcedureType procedure,String file)
+    {
+        String asmFile = "";
+        try {
+            asmFile = new Scanner(new File("images/"+file)).useDelimiter("\\Z").next();
+        } catch (FileNotFoundException ex) {
+            return;
         }
-        catch(Exception e)
+        asmFile = asmFile.replace("\r", "");
+        String[]lines = asmFile.split("\n");
+        //procedure.stream.setBounds(libraryWidth, buttonHeight, width-libraryWidth, height-(2*buttonHeight));
+        for(String line : lines)
         {
-            
+            if(!line.equals("") && !line.contains("#"))
+            {
+                String[]parts = line.split(" ");
+                BlockNode input = procedure.stream.addBlock(library.get(parts[0]));
+                for(int i=1;i<parts.length;++i)
+                {
+                    input.setUserInput(i-1, parts[i].replace("_", " "));
+                }
+            }
         }
     }
 
@@ -186,6 +234,9 @@ public class Game implements ClickBackable
     public void backClick(ScreenComponent c)
     {
         if(c==sendButton)
-            build();
+            if(actStream==mainStream)
+                build();
+            else
+                setDrawStream(mainStream);
     }
 }

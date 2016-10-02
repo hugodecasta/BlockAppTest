@@ -59,6 +59,6 @@ public class Trash extends ScreenComponent
     public void mouseDropObject(ScreenComponent c)
     {
         if(c.getClass() == BlockNode.class)
-            g.mainStream.remove(((BlockNode)c));
+            g.actStream.remove(((BlockNode)c));
     }
 }

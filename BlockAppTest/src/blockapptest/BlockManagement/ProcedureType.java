@@ -14,16 +14,18 @@ import java.awt.Color;
 public class ProcedureType extends BlockType
 {
     String asmProcedure;
-    public ProcedureType(String name, String image, Color color,String asmProcedure)
+    public ProcedureStream stream;
+    public ProcedureType(String name, String image, Color color)
     {
         super(name, image, color, 0, 0, 0);
-        this.asmProcedure = asmProcedure;
+        stream = new ProcedureStream(name+"_stream", color,this.image);
     }
 
     @Override
-    public String getAsm(int[] userInputs)
+    public String getAsm(String[] userInputs)
     {
-        return asmProcedure+"\n";
+        Stream.addToParse(stream);
+        return "call "+stream.name+"\n";
     }
     
 }
